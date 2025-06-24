@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoPixels | EchoHub Network</title>
+
+  <!-- Tailwind & your compiled CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="all.min.css" />
+
+<!-- Solana Phantom Wallet Connection -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const walletBtns = ["connect-wallet", "connect-wallet-mobile"];
+  walletBtns.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    btn && btn.addEventListener('click', async () => {
+      const isPhantomInstalled = window.solana && window.solana.isPhantom;
+      if (isPhantomInstalled) {
+        try {
+          const resp = await window.solana.connect();
+          alert(`Wallet connected: ${resp.publicKey.toString()}`);
+        } catch (err) {
+          alert("Wallet connection failed.");
+          console.error(err);
+        }
+      } else {
+        alert("Phantom Wallet not found. Please install it first.");
+      }
+    });
+  });
+});
+</script>
+
+
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+      
+      :root {
+          --primary: #0066ff;
+          --primary-dark: #0044cc;
+          --secondary: #00ccff;
+          --accent: #ff00cc;
+          --dark: #050b1f;
+          --darker: #030612;
+          --light: #e0e7ff;
+      }
+      
+      html {
+          scroll-behavior: smooth;
+      }
+      
+      body {
+          font-family: 'Rajdhani', sans-serif;
+          background: linear-gradient(to bottom, var(--darker), var(--dark));
+          color: var(--light);
+          overflow-x: hidden;
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+          font-family: 'Orbitron', sans-serif;
+      }
+      
+      .glow {
+          filter: drop-shadow(0 0 8px var(--primary));
+      }
+      
+      .glow-text {
+          text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+      }
+      
+      .glow-accent {
+          filter: drop-shadow(0 0 8px var(--accent));
+      }
+      
+      .gradient-text {
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+      }
+      
+      .btn-primary {
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          color: white;
+          font-family: 'Orbitron', sans-serif;
+          padding: 0.75rem 2rem;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          letter-spacing: 1px;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+          box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+      }
+      
+      .btn-primary:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.7);
+      }
+      
+      .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: all 0.6s ease;
+          z-index: -1;
+      }
+      
+      .btn-primary:hover::before {
+          left: 100%;
+      }
+      
+      .card {
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          overflow: hidden;
+          transition: all 0.3s ease;
+      }
+      
+      .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+          border-color: rgba(0, 102, 255, 0.5);
+      }
+      
+      .echo-rings {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 500px;
+          height: 500px;
+          z-index: -1;
+      }
+      
+      .ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 2px solid var(--primary);
+          opacity: 0;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          animation: pulse 4s infinite;
+      }
+      
+      .ring:nth-child(1) {
+          width: 100px;
+          height: 100px;
+          animation-delay: 0s;
+      }
+      
+      .ring:nth-child(2) {
+          width: 200px;
+          height: 200px;
+          animation-delay: 1s;
+      }
+      
+      .ring:nth-child(3) {
+          width: 300px;
+          height: 300px;
+          animation-delay: 2s;
+      }
+      
+      .ring:nth-child(4) {
+          width: 400px;
+          height: 400px;
+          animation-delay: 3s;
+      }
+      
+      @keyframes pulse {
+          0% {
+              transform: translate(-50%, -50%) scale(0.5);
+              opacity: 0.8;
+              border-color: var(--primary);
+          }
+          100% {
+              transform: translate(-50%, -50%) scale(1.5);
+              opacity: 0;
+              border-color: var(--secondary);
+          }
+      }
+      
+      .pixel-grid {
+          display: grid;
+          grid-template-columns: repeat(10, 1fr);
+          gap: 2px;
+          width: 100%;
+          aspect-ratio: 1/1;
+          max-width: 300px;
+          margin: 0 auto;
+      }
+      
+      .pixel {
+          background: rgba(0, 102, 255, 0.2);
+          border-radius: 2px;
+          transition: all 0.2s ease;
+      }
+      
+      .pixel.filled {
+          background: var(--primary);
+      }
+      
+      .pixel:hover {
+          background: var(--secondary);
+          transform: scale(1.1);
+      }
+      
+      .tokenomics-chart {
+          position: relative;
+          width: 100%;
+          max-width: 300px;
+          height: 300px;
+          margin: 0 auto;
+      }
+      
+      .sticky-nav {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(5, 11, 31, 0.8);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.3);
+          border-radius: 50px;
+          padding: 0.5rem 1.5rem;
+          z-index: 100;
+          display: flex;
+          gap: 1.5rem;
+          box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
+      }
+      
+      .sticky-nav a {
+          color: var(--light);
+          transition: all 0.3s ease;
+      }
+      
+      .sticky-nav a:hover {
+          color: var(--primary);
+          transform: translateY(-3px);
+      }
+      
+      .countdown {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          margin: 2rem 0;
+      }
+      
+      .countdown-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(5, 11, 31, 0.7);
+          border: 1px solid rgba(0, 102, 255, 0.3);
+          border-radius: 0.5rem;
+          padding: 0.5rem 1rem;
+          min-width: 80px;
+      }
+      
+      .countdown-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--primary);
+      }
+      
+      .countdown-label {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+      }
+      
+      .hub-icon {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+          color: var(--primary);
+      }
+      
+      .new-badge {
+          background: linear-gradient(90deg, var(--accent), var(--secondary));
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 1rem;
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 1px;
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+      }
+      
+      .roadmap-timeline {
+          position: relative;
+          max-width: 1200px;
+          margin: 0 auto;
+      }
+      
+      .roadmap-timeline::after {
+          content: '';
+          position: absolute;
+          width: 6px;
+          background: linear-gradient(to bottom, var(--primary), var(--secondary));
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          margin-left: -3px;
+          border-radius: 3px;
+      }
+      
+      .roadmap-container {
+          padding: 10px 40px;
+          position: relative;
+          background-color: inherit;
+          width: 50%;
+      }
+      
+      .roadmap-container::after {
+          content: '';
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          right: -10px;
+          background: var(--primary);
+          border: 4px solid var(--secondary);
+          top: 15px;
+          border-radius: 50%;
+          z-index: 1;
+          box-shadow: 0 0 10px var(--primary);
+      }
+      
+      .left {
+          left: 0;
+      }
+      
+      .right {
+          left: 50%;
+      }
+      
+      .left::before {
+          content: " ";
+          height: 0;
+          position: absolute;
+          top: 22px;
+          width: 0;
+          z-index: 1;
+          right: 30px;
+          border: medium solid rgba(0, 102, 255, 0.2);
+          border-width: 10px 0 10px 10px;
+          border-color: transparent transparent transparent rgba(0, 102, 255, 0.2);
+      }
+      
+      .right::before {
+          content: " ";
+          height: 0;
+          position: absolute;
+          top: 22px;
+          width: 0;
+          z-index: 1;
+          left: 30px;
+          border: medium solid rgba(0, 102, 255, 0.2);
+          border-width: 10px 10px 10px 0;
+          border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+      }
+      
+      .right::after {
+          left: -10px;
+      }
+      
+      .roadmap-content {
+          padding: 20px 30px;
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          position: relative;
+          transition: all 0.3s ease;
+      }
+      
+      .roadmap-content:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+          border-color: rgba(0, 102, 255, 0.5);
+      }
+      
+      .roadmap-date {
+          display: inline-block;
+          padding: 5px 15px;
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          color: white;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          margin-bottom: 15px;
+      }
+      
+      .whitepaper-section {
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          margin-bottom: 1.5rem;
+          overflow: hidden;
+      }
+      
+      .whitepaper-header {
+          padding: 1.5rem;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s ease;
+      }
+      
+      .whitepaper-header:hover {
+          background: rgba(0, 102, 255, 0.1);
+      }
+      
+      .whitepaper-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.5s ease;
+          padding: 0 1.5rem;
+      }
+      
+      .whitepaper-content.active {
+          max-height: 1000px;
+          padding: 0 1.5rem 1.5rem;
+      }
+      
+      .whitepaper-toggle {
+          transition: transform 0.3s ease;
+      }
+      
+      .whitepaper-toggle.active {
+          transform: rotate(180deg);
+      }
+      
+      @media screen and (max-width: 768px) {
+          .roadmap-timeline::after {
+              left: 31px;
+          }
+          
+          .roadmap-container {
+              width: 100%;
+              padding-left: 70px;
+              padding-right: 25px;
+          }
+          
+          .roadmap-container::before {
+              left: 60px;
+              border-width: 10px 10px 10px 0;
+              border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+          }
+          
+          .left::after, .right::after {
+              left: 21px;
+          }
+          
+          .right {
+              left: 0;
+          }
+      }
+  </style>  
+</head>
+
+<body class="bg-[#0d1216] text-white font-sans flex flex-col min-h-screen">
+
+  <!-- Header / Navigation -->
+  <header class="fixed top-0 w-full z-50 bg-opacity-80 bg-gray-900 backdrop-blur-md border-b border-blue-900/30">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+  
+      <!-- Logo -->
+      <a href="saved_resource(1).html" class="flex items-center">
+        <!-- your SVG logo -->
+        <span class="text-xl font-bold tracking-wider">
+          ECHOHUB<span class="gradient-text">NETWORK</span>
+        </span>
+      </a>
+  
+      <!-- Desktop Links -->
+      <div class="flex items-center space-x-6">
+        <nav class="hidden md:flex space-x-8">
+          <a href="saved_resource(1).html#about" class="hover:underline">About</a>
+          <a href="saved_resource(1).html#sub-hubs" class="hover:underline">Sub-Hubs</a>
+          <a href="saved_resource(1).html#tokenomics" class="hover:underline">Tokenomics</a>
+          <a href="saved_resource(1).html#whitepaper" class="hover:underline">Whitepaper</a>
+          <a href="saved_resource(1).html#roadmap" class="hover:underline">Roadmap</a>
+          <a href="saved_resource(1).html#join" class="hover:underline">Join</a>
+        </nav>
+  
+        <!-- Connect Wallet button (desktop) -->
+        <button
+          id="connect-wallet"
+          class="btn-primary ml-4 hidden md:inline-flex items-center"
+        >
+          Connect Wallet
+        </button>
+      </div>
+  
+      <!-- Mobile Hamburger -->
+      <div class="md:hidden">
+        <button id="menu-toggle" class="text-white">
+          <!-- hamburger SVG -->
+        </button>
+      </div>
+    </div>
+  
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
+      <div class="px-2 pt-2 pb-4 space-y-1 text-center">
+        <a href="saved_resource(1).html#about" class="block py-2 hover:underline">About</a>
+        <a href="saved_resource(1).html#sub-hubs" class="block py-2 hover:underline">Sub-Hubs</a>
+        <a href="saved_resource(1).html#tokenomics" class="block py-2 hover:underline">Tokenomics</a>
+        <a href="saved_resource(1).html#whitepaper" class="block py-2 hover:underline">Whitepaper</a>
+        <a href="saved_resource(1).html#roadmap" class="block py-2 hover:underline">Roadmap</a>
+        <a href="saved_resource(1).html#join" class="block py-2 hover:underline">Join</a>
+        <!-- Connect Wallet (mobile) -->
+        <button
+          id="connect-wallet-mobile"
+          class="btn-primary w-full mt-2 inline-flex justify-center"
+        >
+          Connect Wallet
+        </button>
+      </div>
+    </div>
+  </header>
+  
+
+
+  <!-- Hero -->
+  <main class="flex-grow pt-20">
+    <section class="container mx-auto px-4 text-center py-16">
+      <h1 class="text-5xl md:text-6xl font-bold mb-4">
+        Echo<span class="gradient-text">Pixels</span>
+      </h1>
+      <p class="text-lg opacity-80 mb-12">
+        Own a piece of the front page. Buy pixel packages, then trade them on our marketplace.
+      </p>
+    </section>
+
+    <!-- Buy Packages -->
+    <section id="packages" class="container mx-auto px-4 py-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Buy Pixel Packages</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- 10×10 -->
+        <div class="card p-6 flex flex-col">
+          <div class="hub-icon mb-4">
+            <i class="fas fa-th" style="font-size:2rem; color:var(--primary)"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">10×10 Pixels</h3>
+          <p class="mb-4 opacity-80">100 total pixels<br/>Price: 1 SOL</p>
+          <a href="#" class="btn-primary mt-auto inline-flex items-center justify-center">
+            Buy Now
+          </a>
+        </div>
+        <!-- 50×50 -->
+        <div class="card p-6 flex flex-col">
+          <div class="hub-icon mb-4">
+            <i class="fas fa-th-large" style="font-size:2rem; color:var(--primary)"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">50×50 Pixels</h3>
+          <p class="mb-4 opacity-80">2,500 total pixels<br/>Price: 20 SOL</p>
+          <a href="#" class="btn-primary mt-auto inline-flex items-center justify-center">
+            Buy Now
+          </a>
+        </div>
+        <!-- 100×100 -->
+        <div class="card p-6 flex flex-col">
+          <div class="hub-icon mb-4">
+            <i class="fas fa-layer-group" style="font-size:2rem; color:var(--primary)"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">100×100 Pixels</h3>
+          <p class="mb-4 opacity-80">10,000 total pixels<br/>Price: 75 SOL</p>
+          <a href="#" class="btn-primary mt-auto inline-flex items-center justify-center">
+            Buy Now
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Marketplace -->
+    <section id="marketplace" class="container mx-auto px-4 py-16 bg-gray-900/30 rounded-2xl">
+      <h2 class="text-3xl font-bold mb-8 text-center">Marketplace</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left">
+          <thead>
+            <tr class="border-b border-blue-900/30">
+              <th class="px-4 py-2">Lot ID</th>
+              <th class="px-4 py-2">Size</th>
+              <th class="px-4 py-2">Owner</th>
+              <th class="px-4 py-2">Price</th>
+              <th class="px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-blue-900/20">
+              <td class="px-4 py-3">#1024</td>
+              <td class="px-4 py-3">10×10</td>
+              <td class="px-4 py-3">0xA3f…9B2</td>
+              <td class="px-4 py-3">1.2 SOL</td>
+              <td class="px-4 py-3">
+                <a href="#" class="btn-primary inline-block text-sm">Buy</a>
+              </td>
+            </tr>
+            <tr class="border-b border-blue-900/20">
+              <td class="px-4 py-3">#2048</td>
+              <td class="px-4 py-3">50×50</td>
+              <td class="px-4 py-3">0xF1c…7D4</td>
+              <td class="px-4 py-3">22 SOL</td>
+              <td class="px-4 py-3">
+                <a href="#" class="btn-primary inline-block text-sm">Buy</a>
+              </td>
+            </tr>
+            <!-- more rows… -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-8 text-center text-sm opacity-50">
+    © 2025 EchoHub Network
+  </footer>
+
+  <!-- JS Bundles -->
+  <script src="7.16.0.min.js"></script>
+  <script src="7b94e73388593f73.vendor.js"></script>
+  <script src="9e6139e4888034e2.runtime.js"></script>
+  <!-- …any other scripts from index.html… -->
+
+  <!-- ==============================================
+     EchoPixels Interactive 10M-Pixel Grid
+============================================== -->
+<section id="echopixels-grid" class="py-20 bg-[#0d1216] text-white">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-center">
+      EchoPixels Interactive Ad Space
+    </h2>
+    <p class="text-center mb-8 opacity-80">
+      Zoom & pan our 9 million-pixel canvas. Click a block to purchase or view info.
+    </p>
+
+    <div class="w-full h-[80vh] border border-blue-900/30 rounded-xl overflow-hidden relative">
+      <canvas id="pixelCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  // Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+  import { getFirestore, doc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+  // Your Firebase configuration (Replace placeholders with your actual config)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
+    authDomain: "echo-pixels.firebaseapp.com",
+    projectId: "echo-pixels",
+    storageBucket: "echo-pixels.appspot.com",
+    messagingSenderId: "666866433912",
+    appId: "1:666866433912:web:28c1a82bec77d46043528d",
+    measurementId: "G-QS33CX4R74"
+  };
+
+  // Initialize Firebase app and Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Canvas setup
+  const canvas = document.getElementById('pixelCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const totalSize = 3000; // full grid size
+  const blockSize = 10;   // size per pixel-block
+  let scale = 0.2;
+  let offsetX = 0;
+  let offsetY = 0;
+  let isDragging = false, dragStart = {};
+
+  // Resize canvas on window resize
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    drawGrid();
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  // Fetch purchased blocks from Firestore
+  let purchasedBlocks = {};
+
+  async function fetchBlocks() {
+    const snapshot = await getDocs(collection(db, 'pixelBlocks'));
+    snapshot.forEach(doc => {
+      purchasedBlocks[doc.id] = doc.data();
+    });
+    drawGrid();
+  }
+
+  fetchBlocks();
+
+  // Drawing function
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cols = Math.ceil(canvas.width / (blockSize * scale));
+    const rows = Math.ceil(canvas.height / (blockSize * scale));
+    const startCol = Math.floor(offsetX / blockSize);
+    const startRow = Math.floor(offsetY / blockSize);
+
+    for (let i = -1; i <= cols; i++) {
+      for (let j = -1; j <= rows; j++) {
+        const x = (startCol + i) * blockSize;
+        const y = (startRow + j) * blockSize;
+        if (x < 0 || y < 0 || x >= totalSize || y >= totalSize) continue;
+        const screenX = (x - offsetX) * scale;
+        const screenY = (y - offsetY) * scale;
+        const s = blockSize * scale;
+        const id = `${x / blockSize}_${y / blockSize}`;
+
+        ctx.fillStyle = purchasedBlocks[id] ? "#0066ff" : "#050b1f";
+        ctx.fillRect(screenX, screenY, s, s);
+        ctx.strokeStyle = "#003366";
+        ctx.strokeRect(screenX, screenY, s, s);
+      }
+    }
+  }
+
+  // Zoom functionality
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const zoom = e.deltaY * -0.001;
+    scale = Math.min(Math.max(scale * (1 + zoom), 0.02), 4);
+    drawGrid();
+  });
+
+  // Pan functionality
+  canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    offsetX -= (e.clientX - dragStart.x) / scale;
+    offsetY -= (e.clientY - dragStart.y) / scale;
+    dragStart = { x: e.clientX, y: e.clientY };
+    requestAnimationFrame(drawGrid);
+  });
+
+  canvas.addEventListener('mouseup', () => isDragging = false);
+  canvas.addEventListener('mouseleave', () => isDragging = false);
+
+  // Click-to-Purchase Logic (Placeholder for future wallet integration)
+  canvas.addEventListener('click', (e) => {
+    const x = Math.floor(e.offsetX / scale + offsetX);
+    const y = Math.floor(e.offsetY / scale + offsetY);
+    const blockX = Math.floor(x / blockSize) * blockSize;
+    const blockY = Math.floor(y / blockSize) * blockSize;
+    const blockId = `${blockX / blockSize}_${blockY / blockSize}`;
+
+    if (purchasedBlocks[blockId]) {
+      const targetURL = purchasedBlocks[blockId].targetURL || "#";
+      window.open(targetURL, '_blank');
+    } else {
+      alert(`This block at ${blockX},${blockY} is available! Integrate your wallet to purchase.`);
+      // TODO: Future wallet integration for purchase transaction
+    }
+  });
+</script>
+
+
+<!-- Firebase Setup (correct version for your setup) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
+  projectId: "YOUR_FIREBASE_PROJECT_ID",
+  storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+};
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
+  authDomain: "echo-pixels.firebaseapp.com",
+  projectId: "echo-pixels",
+  storageBucket: "echo-pixels.appspot.com",
+  messagingSenderId: "666866433912",
+  appId: "1:666866433912:web:28c1a82bec77d46043528d",
+  measurementId: "G-QS33CX4R74"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const db = firebase.firestore();
+
+const canvas = document.getElementById('pixelCanvas');
+const ctx = canvas.getContext('2d');
+
+const totalSize = 3000;
+const blockSize = 10;
+let scale = 0.2;
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false, dragStart = {};
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  drawGrid();
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+let purchasedBlocks = {};
+
+async function fetchBlocks() {
+  const snapshot = await db.collection('pixelBlocks').get();
+  snapshot.docs.forEach(doc => {
+    purchasedBlocks[doc.id] = doc.data();
+  });
+  drawGrid();
+}
+
+fetchBlocks();
+
+function drawGrid() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cols = Math.ceil(canvas.width/(blockSize*scale));
+  const rows = Math.ceil(canvas.height/(blockSize*scale));
+  const startCol = Math.floor(offsetX/blockSize);
+  const startRow = Math.floor(offsetY/blockSize);
+
+  for(let i=-1;i<cols+1;i++) {
+    for(let j=-1;j<rows+1;j++) {
+      const x=(startCol+i)*blockSize, y=(startRow+j)*blockSize;
+      if(x<0||y<0||x>=totalSize||y>=totalSize)continue;
+      const screenX=(x-offsetX)*scale, screenY=(y-offsetY)*scale, s=blockSize*scale;
+      const id=`${x/blockSize}_${y/blockSize}`;
+
+      if(purchasedBlocks[id]) {
+        ctx.fillStyle="#0066ff";
+      }else{
+        ctx.fillStyle="#050b1f";
+      }
+      ctx.fillRect(screenX,screenY,s,s);
+      ctx.strokeStyle="#003366";
+      ctx.strokeRect(screenX,screenY,s,s);
+    }
+  }
+}
+
+canvas.addEventListener('wheel',(e)=>{
+  e.preventDefault();
+  const zoom=e.deltaY*-0.001;
+  scale=Math.min(Math.max(scale*(1+zoom),0.02),4);
+  drawGrid();
+});
+
+canvas.addEventListener('mousedown',(e)=>{
+  isDragging=true; dragStart={x:e.clientX,y:e.clientY};
+});
+
+canvas.addEventListener('mousemove',(e)=>{
+  if(!isDragging)return;
+  offsetX-=(e.clientX-dragStart.x)/scale;
+  offsetY-=(e.clientY-dragStart.y)/scale;
+  dragStart={x:e.clientX,y:e.clientY};
+  requestAnimationFrame(drawGrid);
+});
+
+canvas.addEventListener('mouseup',()=>isDragging=false);
+canvas.addEventListener('mouseleave',()=>isDragging=false);
+
+canvas.addEventListener('click',(e)=>{
+  const x=Math.floor(e.offsetX/scale+offsetX);
+  const y=Math.floor(e.offsetY/scale+offsetY);
+  const blockX=Math.floor(x/blockSize)*blockSize;
+  const blockY=Math.floor(y/blockSize)*blockSize;
+  const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
+
+  if(purchasedBlocks[blockId]) {
+    window.open(purchasedBlocks[blockId].targetURL,'_blank');
+  } else {
+    alert(`Purchase available block at ${blockX}, ${blockY}`);
+    // Future: wallet integration + purchase logic here
+  }
+});
+</script>
+
+
+</body>
+</html>
