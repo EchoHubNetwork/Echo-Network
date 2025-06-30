@@ -8,40 +8,65 @@
   </div>
 </div>
 // --- My Lots Modal Logic ---
-function showMyLotsModal() {
-  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
-  if (!user) {
-    alert('Connect your wallet to view your lots.');
-    return;
+document.addEventListener('DOMContentLoaded', function() {
+  function showMyLotsModal() {
+    const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+    if (!user) {
+      alert('Connect your wallet to view your lots.');
+      return;
+    }
+    const lots = getUserLots();
+    const listDiv = document.getElementById('myLotsList');
+    if (!listDiv) {
+      console.error('myLotsList element not found');
+      return;
+    }
+    if (!lots.length) {
+      listDiv.innerHTML = '<div style="color:#888;">You do not own any lots yet.</div>';
+    } else {
+      listDiv.innerHTML = lots.map((lot, idx) => {
+        const desc = `Lot #${idx+1}: (${lot.x},${lot.y}) - ${lot.w}x${lot.h}`;
+        return `<div style='margin-bottom:12px;padding:10px 8px;background:#f7f7f7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;'>
+          <span style='color:#222;'>${desc}</span>
+          <button class='editLotBtn' data-lot='${encodeURIComponent(JSON.stringify(lot))}' style='padding:6px 14px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;'>Edit</button>
+        </div>`;
+      }).join('');
+    }
+    document.getElementById('myLotsModal').classList.remove('hidden');
   }
-  const lots = getUserLots();
-  const listDiv = document.getElementById('myLotsList');
-  if (!lots.length) {
-    listDiv.innerHTML = '<div style="color:#888;">You do not own any lots yet.</div>';
-  } else {
-    listDiv.innerHTML = lots.map((lot, idx) => {
-      const desc = `Lot #${idx+1}: (${lot.x},${lot.y}) - ${lot.w}x${lot.h}`;
-      return `<div style='margin-bottom:12px;padding:10px 8px;background:#f7f7f7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;'>
-        <span style='color:#222;'>${desc}</span>
-        <button class='editLotBtn' data-lot='${encodeURIComponent(JSON.stringify(lot))}' style='padding:6px 14px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;'>Edit</button>
-      </div>`;
-    }).join('');
-  }
-  document.getElementById('myLotsModal').classList.remove('hidden');
-}
 
-document.getElementById('myLotsBtn').onclick = showMyLotsModal;
-document.getElementById('closeMyLotsModal').onclick = () => {
-  document.getElementById('myLotsModal').classList.add('hidden');
-};
-
-document.getElementById('myLotsList').onclick = function(e) {
-  if (e.target.classList.contains('editLotBtn')) {
-    const lot = JSON.parse(decodeURIComponent(e.target.getAttribute('data-lot')));
+  var myLotsBtn = document.getElementById('myLotsBtn');
+  var closeMyLotsModal = document.getElementById('closeMyLotsModal');
+  var myLotsList = document.getElementById('myLotsList');
+  if (!myLotsBtn) console.error('myLotsBtn element not found');
+  if (!closeMyLotsModal) console.error('closeMyLotsModal element not found');
+  if (!myLotsList) console.error('myLotsList element not found');
+  if (myLotsBtn) myLotsBtn.onclick = showMyLotsModal;
+  if (closeMyLotsModal) closeMyLotsModal.onclick = () => {
     document.getElementById('myLotsModal').classList.add('hidden');
-    openDesignModal(lot);
+  };
+  if (myLotsList) myLotsList.onclick = function(e) {
+    if (e.target.classList.contains('editLotBtn')) {
+      const lot = JSON.parse(decodeURIComponent(e.target.getAttribute('data-lot')));
+      document.getElementById('myLotsModal').classList.add('hidden');
+      openDesignModal(lot);
+    }
+  };
+
+  // Fix for Confirm Purchase button event listeners
+  var confirmBtn = document.getElementById('confirmPaymentSent');
+  if (confirmBtn) {
+    confirmBtn.onclick = window.confirmPaymentSentHandler || confirmBtn.onclick;
+  } else {
+    console.error('confirmPaymentSent button not found');
   }
-};
+  var openDesignBtn = document.getElementById('openDesignLot');
+  if (openDesignBtn) {
+    openDesignBtn.onclick = window.openDesignLotHandler || openDesignBtn.onclick;
+  } else {
+    console.error('openDesignLot button not found');
+  }
+});
 <!DOCTYPE html>
 <html lang="en">
 <head>
