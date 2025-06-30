@@ -469,7 +469,7 @@
           <a href="index.html#about" class="hover:underline">About</a>
           <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
           <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
+          <a href="index.html#whitepaper" class="hover:underline">Whitepaper</a>
           <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
           <a href="index.html#join" class="hover:underline">Join</a>
         </nav>
@@ -481,6 +481,33 @@
         >
           Connect Wallet
         </button>
+        <!-- Connect Wallet button (mobile) -->
+        <button
+          id="connect-wallet-mobile"
+          class="btn-primary ml-4 inline-flex items-center md:hidden"
+        >
+          Connect Wallet
+        </button>
+</header>
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<script>
+// Phantom Wallet Connect logic for both desktop and mobile
+async function connectWallet() {
+  if (window.solana && window.solana.isPhantom) {
+    try {
+      const resp = await window.solana.connect();
+      const walletAddress = resp.publicKey.toString();
+      alert(`Wallet connected: ${walletAddress}`);
+    } catch (err) {
+      alert("Wallet connection failed.");
+    }
+  } else {
+    alert("Phantom Wallet not found. Please install it first.");
+  }
+}
+document.getElementById('connect-wallet')?.addEventListener('click', connectWallet);
+document.getElementById('connect-wallet-mobile')?.addEventListener('click', connectWallet);
+</script>
       </div>
   
       <!-- Mobile Hamburger -->
@@ -494,12 +521,12 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
       <div class="px-2 pt-2 pb-4 space-y-1 text-center">
-          <a href="index.html#about" class="hover:underline">About</a>
-          <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
-          <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
-          <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
-          <a href="index.html#join" class="hover:underline">Join</a>
+        <a href="index.html#about" class="block py-2 hover:underline">About</a>
+        <a href="index.html#sub-hubs" class="block py-2 hover:underline">Sub-Hubs</a>
+        <a href="index.html#tokenomics" class="block py-2 hover:underline">Tokenomics</a>
+        <a href="index.html#whitepaper" class="block py-2 hover:underline">Whitepaper</a>
+        <a href="index.html#roadmap" class="block py-2 hover:underline">Roadmap</a>
+        <a href="index.html#join" class="block py-2 hover:underline">Join</a>
         <!-- Connect Wallet (mobile) -->
         <button
           id="connect-wallet-mobile"
