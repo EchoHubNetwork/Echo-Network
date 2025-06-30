@@ -725,6 +725,117 @@ document.addEventListener("DOMContentLoaded", async () => {
   </div>
 </div>
 
+<!-- Lot Picker Modal HTML (add to body, just before </body>) -->
+<div id="lotPickerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
+    <button id="closeLotPickerModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Select a Lot to Edit</h3>
+    <div id="lotPickerList"></div>
+  </div>
+</div>
+<script>
+document.getElementById('closeLotPickerModal').onclick = () => {
+  document.getElementById('lotPickerModal').classList.add('hidden');
+};
+
+// Group user's owned blocks into contiguous lots
+function getUserLots() {
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!user) return [];
+  let ownedBlocks = Object.entries(purchasedBlocks)
+    .filter(([id, data]) => data.owner === user)
+    .map(([id, data]) => ({ id, ...data }));
+  let lots = [];
+  let visited = new Set();
+  function dfs(block, lot) {
+    visited.add(block.id);
+    lot.push(block);
+    const neighbors = [
+      `${(block.blockX/10)-1}_${block.blockY/10}`,
+      `${(block.blockX/10)+1}_${block.blockY/10}`,
+      `${block.blockX/10}_${(block.blockY/10)-1}`,
+      `${block.blockX/10}_${(block.blockY/10)+1}`
+    ];
+    for (let nId of neighbors) {
+      if (!visited.has(nId)) {
+        const nBlock = ownedBlocks.find(b => b.id === nId);
+        if (nBlock) dfs(nBlock, lot);
+      }
+    }
+  }
+  for (let block of ownedBlocks) {
+    if (!visited.has(block.id)) {
+      let lot = [];
+      dfs(block, lot);
+      lots.push(lot);
+    }
+  }
+  return lots.map(lotBlocks => {
+    const xs = lotBlocks.map(b => b.blockX);
+    const ys = lotBlocks.map(b => b.blockY);
+    return {
+      blocks: lotBlocks,
+      x: Math.min(...xs),
+      y: Math.min(...ys),
+      w: Math.max(...xs) - Math.min(...xs) + 10,
+      h: Math.max(...ys) - Math.min(...ys) + 10,
+      owner: user,
+      link: lotBlocks[0]?.targetURL || ''
+    };
+  });
+}
+
+function showLotPickerModal(lots) {
+  const modal = document.getElementById('lotPickerModal');
+  const list = document.getElementById('lotPickerList');
+  list.innerHTML = '';
+  lots.forEach((lot, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary w-full mb-2';
+    btn.textContent = `Lot #${idx + 1} (${lot.w}x${lot.h} at ${lot.x},${lot.y})`;
+    btn.onclick = () => {
+      modal.classList.add('hidden');
+      openDesignModal({ ...lot });
+    };
+    list.appendChild(btn);
+  });
+  modal.classList.remove('hidden');
+}
+
+// Enhanced canvas click handler for ownership/editing
+canvas.addEventListener('click',(e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/scale+offsetX);
+  const y=Math.floor((e.clientY-rect.top)/scale+offsetY);
+  const blockX=Math.floor(x/blockSize)*blockSize;
+  const blockY=Math.floor(y/blockSize)*blockSize;
+  const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
+  selectedBlock = { blockX, blockY, blockId };
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if(purchasedBlocks[blockId]) {
+    if (purchasedBlocks[blockId].owner === user) {
+      // User owns this block, find all their lots
+      const lots = getUserLots();
+      if (lots.length === 1) {
+        openDesignModal({ ...lots[0] });
+      } else {
+        showLotPickerModal(lots);
+      }
+    } else {
+      // Not owner, open link if exists
+      if(purchasedBlocks[blockId].targetURL) {
+        window.open(purchasedBlocks[blockId].targetURL,'_blank');
+      } else {
+        alert('This block is owned.');
+      }
+    }
+  } else {
+    // Not owned, open lot modal for 10x10 at this location
+    openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
+  }
+});
+</script>
+
 <!-- Firebase v10+ (module) -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
@@ -1238,15 +1349,26 @@ canvas.addEventListener('click',(e)=>{
   const blockY=Math.floor(y/blockSize)*blockSize;
   const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
   selectedBlock = { blockX, blockY, blockId };
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
   if(purchasedBlocks[blockId]) {
-    // Open link if exists
-    if(purchasedBlocks[blockId].targetURL) {
-      window.open(purchasedBlocks[blockId].targetURL,'_blank');
+    if (purchasedBlocks[blockId].owner === user) {
+      // User owns this block, find all their lots
+      const lots = getUserLots();
+      if (lots.length === 1) {
+        openDesignModal({ ...lots[0] });
+      } else {
+        showLotPickerModal(lots);
+      }
     } else {
-      alert('This block is owned.');
+      // Not owner, open link if exists
+      if(purchasedBlocks[blockId].targetURL) {
+        window.open(purchasedBlocks[blockId].targetURL,'_blank');
+      } else {
+        alert('This block is owned.');
+      }
     }
   } else {
-    // Open the lot modal for a 10x10 lot at this location
+    // Not owned, open lot modal for 10x10 at this location
     openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
   }
 });
