@@ -1027,8 +1027,9 @@ document.getElementById('openWalletPay').onclick = async () => {
     transaction.feePayer = fromPubkey;
     transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    // Let Phantom sign AND send the transaction
-    const txid = await phantomStatus.provider.sendTransaction(transaction, connection);
+    // Let Phantom sign AND send the transaction (latest API)
+    const signedTx = await window.solana.signAndSendTransaction(transaction);
+    const txid = signedTx.signature;
     document.getElementById('lotModalStatus').textContent = 'Transaction sent! TX: ' + txid;
     window._pendingLot.txid = txid;
   } catch (e) {
