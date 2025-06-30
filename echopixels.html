@@ -1,26 +1,5 @@
-
-<!-- My Lots Button (place in header/nav area, e.g. after wallet connect) -->
-<button
-  id="myLotsBtn"
-  class="btn-primary ml-4 inline-flex items-center"
-  style="z-index:51;"
->
-  My Lots
-</button>
-
-<!-- Place the modal at the end of the body for proper stacking/context -->
-<!-- ...existing code... -->
-<!-- My Lots Modal (placed at end of body for proper stacking) -->
-<div id="myLotsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
-  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
-    <button id="closeMyLotsModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
-    <h3 class="text-2xl font-bold mb-4">Your Lots</h3>
-    <div id="myLotsList"></div>
-  </div>
-</div>
-
-</body>
-<!-- My Lots Modal (moved here for correct stacking and to avoid layout bugs) -->
+<!-- My Lots Button and Modal -->
+<button id="myLotsBtn" style="position:fixed;top:20px;right:20px;z-index:1001;padding:10px 18px;background:#222;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;">My Lots</button>
 <div id="myLotsModal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.65);z-index:1002;display:flex;align-items:center;justify-content:center;">
   <div style="background:#fff;padding:32px 24px 24px 24px;border-radius:12px;min-width:320px;max-width:90vw;max-height:80vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
     <h2 style="margin-top:0;margin-bottom:18px;font-size:1.5em;color:#222;">Your Lots</h2>
@@ -28,91 +7,1597 @@
     <button id="closeMyLotsModal" style="margin-top:18px;padding:8px 18px;background:#eee;border:none;border-radius:5px;cursor:pointer;">Close</button>
   </div>
 </div>
-
+<script>
 // --- My Lots Modal Logic ---
 document.addEventListener('DOMContentLoaded', function() {
-  // Helper: Get lots owned by the connected wallet
-  function getUserLots() {
-    const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
-    if (!user) return [];
-    let ownedBlocks = Object.entries(purchasedBlocks)
-      .filter(([id, data]) => data.owner === user)
-      .map(([id, data]) => ({ id, ...data }));
-    let lots = [];
-    let visited = new Set();
-    function dfs(block, lot) {
-      visited.add(block.id);
-      lot.push(block);
-      const neighbors = [
-        `${(block.blockX/10)-1}_${block.blockY/10}`,
-        `${(block.blockX/10)+1}_${block.blockY/10}`,
-        `${block.blockX/10}_${(block.blockY/10)-1}`,
-        `${block.blockX/10}_${(block.blockY/10)+1}`
-      ];
-      for (let nId of neighbors) {
-        if (!visited.has(nId)) {
-          const nBlock = ownedBlocks.find(b => b.id === nId);
-          if (nBlock) dfs(nBlock, lot);
-        }
-      }
-    }
-    for (let block of ownedBlocks) {
-      if (!visited.has(block.id)) {
-        let lot = [];
-        dfs(block, lot);
-        lots.push(lot);
-      }
-    }
-    return lots.map(lotBlocks => {
-      const xs = lotBlocks.map(b => b.blockX);
-      const ys = lotBlocks.map(b => b.blockY);
-      return {
-        blocks: lotBlocks,
-        x: Math.min(...xs),
-        y: Math.min(...ys),
-        w: Math.max(...xs) - Math.min(...xs) + 10,
-        h: Math.max(...ys) - Math.min(...ys) + 10,
-        owner: user,
-        link: lotBlocks[0]?.targetURL || ''
-      };
-    });
-  }
-
-  // Show the modal with user's lots
   function showMyLotsModal() {
+    const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+    if (!user) {
+      alert('Connect your wallet to view your lots.');
+      return;
+    }
     const lots = getUserLots();
-    const list = document.getElementById('myLotsList');
-    list.innerHTML = '';
-    if (lots.length === 0) {
-      list.innerHTML = '<div class="text-center text-gray-400">You do not own any lots yet.</div>';
+    const listDiv = document.getElementById('myLotsList');
+    if (!listDiv) {
+      console.error('myLotsList element not found');
+      return;
+    }
+    if (!lots.length) {
+      listDiv.innerHTML = '<div style="color:#888;">You do not own any lots yet.</div>';
     } else {
-      lots.forEach((lot, idx) => {
-        const div = document.createElement('div');
-        div.className = 'mb-4 p-3 rounded bg-[#181f2e] border border-blue-900/30';
-        div.innerHTML = `
-          <div><b>Lot #${idx + 1}:</b> ${lot.w}x${lot.h} at (${lot.x},${lot.y})</div>
-          <button class="btn-primary mt-2" data-lot="${idx}">Edit</button>
-        `;
-        list.appendChild(div);
-      });
-      // Attach edit handlers
-      list.querySelectorAll('button[data-lot]').forEach(btn => {
-        btn.onclick = () => {
-          const lot = lots[parseInt(btn.getAttribute('data-lot'))];
-          document.getElementById('myLotsModal').classList.add('hidden');
-          openDesignModal(lot);
-        };
-      });
+      listDiv.innerHTML = lots.map((lot, idx) => {
+        const desc = `Lot #${idx+1}: (${lot.x},${lot.y}) - ${lot.w}x${lot.h}`;
+        return `<div style='margin-bottom:12px;padding:10px 8px;background:#f7f7f7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;'>
+          <span style='color:#222;'>${desc}</span>
+          <button class='editLotBtn' data-lot='${encodeURIComponent(JSON.stringify(lot))}' style='padding:6px 14px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;'>Edit</button>
+        </div>`;
+      }).join('');
     }
     document.getElementById('myLotsModal').classList.remove('hidden');
   }
 
-  // Button and modal event listeners
-  document.getElementById('myLotsBtn').onclick = showMyLotsModal;
-  document.getElementById('closeMyLotsModal').onclick = () => {
+  var myLotsBtn = document.getElementById('myLotsBtn');
+  var closeMyLotsModal = document.getElementById('closeMyLotsModal');
+  var myLotsList = document.getElementById('myLotsList');
+  if (!myLotsBtn) console.error('myLotsBtn element not found');
+  if (!closeMyLotsModal) console.error('closeMyLotsModal element not found');
+  if (!myLotsList) console.error('myLotsList element not found');
+  if (myLotsBtn) myLotsBtn.onclick = showMyLotsModal;
+  if (closeMyLotsModal) closeMyLotsModal.onclick = () => {
     document.getElementById('myLotsModal').classList.add('hidden');
   };
+  if (myLotsList) myLotsList.onclick = function(e) {
+    if (e.target.classList.contains('editLotBtn')) {
+      const lot = JSON.parse(decodeURIComponent(e.target.getAttribute('data-lot')));
+      document.getElementById('myLotsModal').classList.add('hidden');
+      openDesignModal(lot);
+    }
+  };
+
+  // Fix for Confirm Purchase button event listeners
+  var confirmBtn = document.getElementById('confirmPaymentSent');
+  if (confirmBtn) {
+    confirmBtn.onclick = window.confirmPaymentSentHandler || confirmBtn.onclick;
+  } else {
+    console.error('confirmPaymentSent button not found');
+  }
+  var openDesignBtn = document.getElementById('openDesignLot');
+  if (openDesignBtn) {
+    openDesignBtn.onclick = window.openDesignLotHandler || openDesignBtn.onclick;
+  } else {
+    console.error('openDesignLot button not found');
+  }
 });
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoPixels | EchoHub Network</title>
+
+  <!-- Tailwind & your compiled CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="all.min.css" />
+
+<!-- Solana Phantom Wallet Connection -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<script>
+// Robust Phantom wallet detection and connection overhaul
+let phantomStatus = {
+  connected: false,
+  publicKey: null,
+  provider: null
+};
+
+function updateWalletUI() {
+  const btn = document.getElementById('connect-wallet');
+  if (!btn) return;
+  if (phantomStatus.connected && phantomStatus.publicKey) {
+    btn.textContent = 'Wallet: ' + phantomStatus.publicKey.slice(0,4) + '...' + phantomStatus.publicKey.slice(-4);
+    btn.disabled = true;
+    btn.classList.add('opacity-60');
+  } else {
+    btn.textContent = 'Connect Wallet';
+    btn.disabled = false;
+    btn.classList.remove('opacity-60');
+  }
+}
+
+async function detectPhantomProvider() {
+  if (window.solana && window.solana.isPhantom) {
+    phantomStatus.provider = window.solana;
+    window.solana.on('connect', () => {
+      phantomStatus.connected = true;
+      phantomStatus.publicKey = window.solana.publicKey.toString();
+      updateWalletUI();
+    });
+    window.solana.on('disconnect', () => {
+      phantomStatus.connected = false;
+      phantomStatus.publicKey = null;
+      updateWalletUI();
+    });
+    window.solana.on('accountChanged', (pubkey) => {
+      phantomStatus.publicKey = pubkey ? pubkey.toString() : null;
+      phantomStatus.connected = !!pubkey;
+      updateWalletUI();
+    });
+    updateWalletUI();
+    return true;
+  } else {
+    phantomStatus.provider = null;
+    updateWalletUI();
+    return false;
+  }
+}
+
+async function connectPhantomWallet() {
+  if (!phantomStatus.provider) {
+    alert('Phantom Wallet not found. Please install it from https://phantom.app and refresh the page.');
+    return;
+  }
+  try {
+    const resp = await phantomStatus.provider.connect();
+    phantomStatus.connected = true;
+    phantomStatus.publicKey = resp.publicKey.toString();
+    updateWalletUI();
+    alert(`Wallet connected: ${phantomStatus.publicKey}`);
+  } catch (err) {
+    phantomStatus.connected = false;
+    phantomStatus.publicKey = null;
+    updateWalletUI();
+    alert('Wallet connection failed.');
+    console.error(err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Try to detect Phantom every 500ms for 5 seconds
+  let tries = 0;
+  let found = false;
+  while (tries < 10 && !found) {
+    found = await detectPhantomProvider();
+    if (!found) await new Promise(res => setTimeout(res, 500));
+    tries++;
+  }
+  // Add click handler
+  const btn = document.getElementById('connect-wallet');
+  if (btn) btn.onclick = connectPhantomWallet;
+});
+</script>
+
+
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+      
+      :root {
+          --primary: #0066ff;
+          --primary-dark: #0044cc;
+          --secondary: #00ccff;
+          --accent: #ff00cc;
+          --dark: #050b1f;
+          --darker: #030612;
+          --light: #e0e7ff;
+      }
+      
+      html {
+          scroll-behavior: smooth;
+      }
+      
+      body {
+          font-family: 'Rajdhani', sans-serif;
+          background: linear-gradient(to bottom, var(--darker), var(--dark));
+          color: var(--light);
+          overflow-x: hidden;
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+          font-family: 'Orbitron', sans-serif;
+      }
+      
+      .glow {
+          filter: drop-shadow(0 0 8px var(--primary));
+      }
+      
+      .glow-text {
+          text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+      }
+      
+      .glow-accent {
+          filter: drop-shadow(0 0 8px var(--accent));
+      }
+      
+      .gradient-text {
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+      }
+      
+      .btn-primary {
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          color: white;
+          font-family: 'Orbitron', sans-serif;
+          padding: 0.75rem 2rem;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          letter-spacing: 1px;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+          box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+      }
+      
+      .btn-primary:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.7);
+      }
+      
+      .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: all 0.6s ease;
+          z-index: -1;
+      }
+      
+      .btn-primary:hover::before {
+          left: 100%;
+      }
+      
+      .card {
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          overflow: hidden;
+          transition: all 0.3s ease;
+      }
+      
+      .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+          border-color: rgba(0, 102, 255, 0.5);
+      }
+      
+      .echo-rings {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 500px;
+          height: 500px;
+          z-index: -1;
+      }
+      
+      .ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 2px solid var(--primary);
+          opacity: 0;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          animation: pulse 4s infinite;
+      }
+      
+      .ring:nth-child(1) {
+          width: 100px;
+          height: 100px;
+          animation-delay: 0s;
+      }
+      
+      .ring:nth-child(2) {
+          width: 200px;
+          height: 200px;
+          animation-delay: 1s;
+      }
+      
+      .ring:nth-child(3) {
+          width: 300px;
+          height: 300px;
+          animation-delay: 2s;
+      }
+      
+      .ring:nth-child(4) {
+          width: 400px;
+          height: 400px;
+          animation-delay: 3s;
+      }
+      
+      @keyframes pulse {
+          0% {
+              transform: translate(-50%, -50%) scale(0.5);
+              opacity: 0.8;
+              border-color: var(--primary);
+          }
+          100% {
+              transform: translate(-50%, -50%) scale(1.5);
+              opacity: 0;
+              border-color: var(--secondary);
+          }
+      }
+      
+      .pixel-grid {
+          display: grid;
+          grid-template-columns: repeat(10, 1fr);
+          gap: 2px;
+          width: 100%;
+          aspect-ratio: 1/1;
+          max-width: 300px;
+          margin: 0 auto;
+      }
+      
+      .pixel {
+          background: rgba(0, 102, 255, 0.2);
+          border-radius: 2px;
+          transition: all 0.2s ease;
+      }
+      
+      .pixel.filled {
+          background: var(--primary);
+      }
+      
+      .pixel:hover {
+          background: var(--secondary);
+          transform: scale(1.1);
+      }
+      
+      .tokenomics-chart {
+          position: relative;
+          width: 100%;
+          max-width: 300px;
+          height: 300px;
+          margin: 0 auto;
+      }
+      
+      .sticky-nav {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(5, 11, 31, 0.8);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.3);
+          border-radius: 50px;
+          padding: 0.5rem 1.5rem;
+          z-index: 100;
+          display: flex;
+          gap: 1.5rem;
+          box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
+      }
+      
+      .sticky-nav a {
+          color: var(--light);
+          transition: all 0.3s ease;
+      }
+      
+      .sticky-nav a:hover {
+          color: var(--primary);
+          transform: translateY(-3px);
+      }
+      
+      .countdown {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          margin: 2rem 0;
+      }
+      
+      .countdown-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(5, 11, 31, 0.7);
+          border: 1px solid rgba(0, 102, 255, 0.3);
+          border-radius: 0.5rem;
+          padding: 0.5rem 1rem;
+          min-width: 80px;
+      }
+      
+      .countdown-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--primary);
+      }
+      
+      .countdown-label {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+      }
+      
+      .hub-icon {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+          color: var(--primary);
+      }
+      
+      .new-badge {
+          background: linear-gradient(90deg, var(--accent), var(--secondary));
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 1rem;
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 1px;
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+      }
+      
+      .roadmap-timeline {
+          position: relative;
+          max-width: 1200px;
+          margin: 0 auto;
+      }
+      
+      .roadmap-timeline::after {
+          content: '';
+          position: absolute;
+          width: 6px;
+          background: linear-gradient(to bottom, var(--primary), var(--secondary));
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          margin-left: -3px;
+          border-radius: 3px;
+      }
+      
+      .roadmap-container {
+          padding: 10px 40px;
+          position: relative;
+          background-color: inherit;
+          width: 50%;
+      }
+      
+      .roadmap-container::after {
+          content: '';
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          right: -10px;
+          background: var(--primary);
+          border: 4px solid var(--secondary);
+          top: 15px;
+          border-radius: 50%;
+          z-index: 1;
+          box-shadow: 0 0 10px var(--primary);
+      }
+      
+      .left {
+          left: 0;
+      }
+      
+      .right {
+          left: 50%;
+      }
+      
+      .left::before {
+          content: " ";
+          height: 0;
+          position: absolute;
+          top: 22px;
+          width: 0;
+          z-index: 1;
+          right: 30px;
+          border: medium solid rgba(0, 102, 255, 0.2);
+          border-width: 10px 0 10px 10px;
+          border-color: transparent transparent transparent rgba(0, 102, 255, 0.2);
+      }
+      
+      .right::before {
+          content: " ";
+          height: 0;
+          position: absolute;
+          top: 22px;
+          width: 0;
+          z-index: 1;
+          left: 30px;
+          border: medium solid rgba(0, 102, 255, 0.2);
+          border-width: 10px 10px 10px 0;
+          border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+      }
+      
+      .right::after {
+          left: -10px;
+      }
+      
+      .roadmap-content {
+          padding: 20px 30px;
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          position: relative;
+          transition: all 0.3s ease;
+      }
+      
+      .roadmap-content:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+          border-color: rgba(0, 102, 255, 0.5);
+      }
+      
+      .roadmap-date {
+          display: inline-block;
+          padding: 5px 15px;
+          background: linear-gradient(90deg, var(--primary), var(--secondary));
+          color: white;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          margin-bottom: 15px;
+      }
+      
+      .whitepaper-section {
+          background: rgba(5, 11, 31, 0.7);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 102, 255, 0.2);
+          border-radius: 1rem;
+          margin-bottom: 1.5rem;
+          overflow: hidden;
+      }
+      
+      .whitepaper-header {
+          padding: 1.5rem;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s ease;
+      }
+      
+      .whitepaper-header:hover {
+          background: rgba(0, 102, 255, 0.1);
+      }
+      
+      .whitepaper-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.5s ease;
+          padding: 0 1.5rem;
+      }
+      
+      .whitepaper-content.active {
+          max-height: 1000px;
+          padding: 0 1.5rem 1.5rem;
+      }
+      
+      .whitepaper-toggle {
+          transition: transform 0.3s ease;
+      }
+      
+      .whitepaper-toggle.active {
+          transform: rotate(180deg);
+      }
+      
+      @media screen and (max-width: 768px) {
+          .roadmap-timeline::after {
+              left: 31px;
+          }
+          
+          .roadmap-container {
+              width: 100%;
+              padding-left: 70px;
+              padding-right: 25px;
+          }
+          
+          .roadmap-container::before {
+              left: 60px;
+              border-width: 10px 10px 10px 0;
+              border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+          }
+          
+          .left::after, .right::after {
+              left: 21px;
+          }
+          
+          .right {
+              left: 0;
+          }
+      }
+  </style>  
+</head>
+
+<body class="bg-[#0d1216] text-white font-sans flex flex-col min-h-screen">
+
+  <!-- Header / Navigation -->
+  <header class="fixed top-0 w-full z-50 bg-opacity-80 bg-gray-900 backdrop-blur-md border-b border-blue-900/30">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+  
+      <!-- Logo -->
+      <a href="index.html" class="flex items-center">
+        <!-- your SVG logo -->
+        <span class="text-xl font-bold tracking-wider">
+          ECHOHUB<span class="gradient-text">NETWORK</span>
+        </span>
+      </a>
+  
+      <!-- Desktop Links -->
+      <div class="flex items-center space-x-6">
+        <nav class="hidden md:flex space-x-8">
+          <a href="index.html#about" class="hover:underline">About</a>
+          <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
+          <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
+          <a href="index.html#whitepaper" class="hover:underline">Whitepaper</a>
+          <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
+          <a href="index.html#join" class="hover:underline">Join</a>
+        </nav>
+  
+        <!-- Connect Wallet button (desktop) -->
+        <button
+          id="connect-wallet"
+          class="btn-primary ml-4 hidden md:inline-flex items-center"
+        >
+          Connect Wallet
+        </button>
+      </div>
+  
+      <!-- Mobile Hamburger -->
+      <div class="md:hidden">
+        <button id="menu-toggle" class="text-white">
+          <!-- hamburger SVG -->
+        </button>
+      </div>
+    </div>
+  
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
+      <div class="px-2 pt-2 pb-4 space-y-1 text-center">
+        <a href="index.html#about" class="block py-2 hover:underline">About</a>
+        <a href="index.html#sub-hubs" class="block py-2 hover:underline">Sub-Hubs</a>
+        <a href="index.html#tokenomics" class="block py-2 hover:underline">Tokenomics</a>
+        <a href="index.html#whitepaper" class="block py-2 hover:underline">Whitepaper</a>
+        <a href="index.html#roadmap" class="block py-2 hover:underline">Roadmap</a>
+        <a href="index.html#join" class="block py-2 hover:underline">Join</a>
+        <!-- Connect Wallet (mobile) -->
+        <button
+          id="connect-wallet-mobile"
+          class="btn-primary w-full mt-2 inline-flex justify-center"
+        >
+          Connect Wallet
+        </button>
+      </div>
+    </div>
+  </header>
+  
+
+
+  <!-- Combined EchoPixels Header -->
+  <main class="flex-grow pt-20">
+    <section class="container mx-auto px-4 text-center py-16">
+      <h1 class="text-5xl md:text-6xl font-bold mb-4 gradient-text" style="font-family: 'Orbitron', sans-serif;">
+        EchoPixels Interactive Ad Space
+      </h1>
+      <p class="text-lg opacity-80 mb-6">
+        Own a piece of the homepage. Buy pixel packages, then trade or design your space on our marketplace.<br>
+        Zoom & pan our 9 million-pixel canvas. Click a block to purchase or view info.
+      </p>
+    </section>
+
+
+
+
+  <!-- ==============================================
+     EchoPixels Interactive 10M-Pixel Grid
+  ============================================== -->
+<section id="echopixels-grid" class="py-10 bg-[#0d1216] text-white">
+  <div class="container mx-auto px-4">
+
+    <div class="flex flex-col items-center mb-6">
+      <div class="flex gap-4 mb-4">
+        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="10" data-h="10">Quick Buy 10x10</button>
+        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="50" data-h="50">Quick Buy 50x50</button>
+        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="100" data-h="100">Quick Buy 100x100</button>
+        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="200" data-h="200">Quick Buy 200x200</button>
+      </div>
+      <button id="buyLotBtn" class="btn-primary text-lg px-8 py-3">Buy Lot</button>
+    </div>
+    <div class="w-full h-[80vh] border border-blue-900/30 rounded-xl overflow-hidden relative">
+      <canvas id="pixelCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+    </div>
+<!-- Modal for designing/updating owned lot -->
+<div id="designModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-2xl shadow-2xl relative">
+    <button id="closeDesignModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Design Your Lot</h3>
+    <div class="mb-4">
+      <canvas id="designCanvas" class="border border-blue-900/30 bg-white" style="max-width:100%;height:300px;"></canvas>
+    </div>
+    <div class="mb-4 flex gap-4">
+      <input type="color" id="drawColor" value="#000000" title="Draw Color" />
+      <button id="drawMode" class="btn-secondary">Draw</button>
+      <button id="eraseMode" class="btn-secondary">Erase</button>
+      <input type="file" id="uploadImage" accept="image/*" class="btn-secondary" />
+    </div>
+    <div class="mb-4">
+      <label>Embed Link (optional):</label>
+      <input id="designLink" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <button id="saveDesign" class="btn-primary w-full mt-2">Save Design</button>
+    <div id="designModalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
+  </div>
+</section>
+
+<!-- Modal for purchase -->
+<div id="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-md shadow-2xl relative">
+    <button id="closeModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Purchase Pixel Block</h3>
+    <div class="mb-4">
+      <div><b>Block:</b> <span id="modalBlockCoords"></span></div>
+      <div><b>Price:</b> <span id="modalBlockPrice"></span> USD</div>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Your Link (optional):</label>
+      <input id="modalBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <button id="confirmPurchase" class="btn-primary w-full mt-2">Confirm Purchase</button>
+    <div id="modalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<!-- Modal for lot purchase -->
+<div id="lotModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
+    <button id="closeLotModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Buy Pixel Lot</h3>
+    <div class="mb-4 grid grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">Start X</label>
+        <select id="lotStartX" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Start Y</label>
+        <select id="lotStartY" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Width</label>
+        <select id="lotWidth" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Height</label>
+        <select id="lotHeight" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Your Link (optional):</label>
+      <input id="lotBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <div class="mb-4 text-lg">
+      <b>Price:</b> <span id="lotPrice">0</span> USD
+      <span id="lotDiscount" class="ml-2 text-green-400 font-semibold"></span>
+    </div>
+    <div id="lotStep1">
+      <button id="confirmLotPurchase" class="btn-primary w-full mt-2">Confirm Lot Purchase</button>
+    </div>
+    <div id="lotStep2" class="hidden">
+      <div class="mb-2">Send payment to the Solana address below:</div>
+      <div class="bg-[#181f2e] p-2 rounded text-center select-all mb-2 text-blue-400 font-mono">2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c</div>
+      <div class="mb-2">Amount: <span id="lotSolAmount">0</span> SOL</div>
+      <button id="openWalletPay" class="btn-primary w-full mb-2">Send Payment with Wallet</button>
+      <button id="confirmPaymentSent" class="btn-primary w-full">I've Sent Payment</button>
+      <div class="text-xs mt-2 opacity-70">After payment is detected, you'll be able to design your lot.</div>
+    </div>
+    <div id="lotStep3" class="hidden">
+      <div class="mb-2 text-green-400 font-bold">Payment confirmed!</div>
+      <button id="openDesignLot" class="btn-primary w-full">Design Your Lot</button>
+    </div>
+    <div id="lotModalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<!-- Lot Picker Modal HTML (add to body, just before </body>) -->
+<div id="lotPickerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
+    <button id="closeLotPickerModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Select a Lot to Edit</h3>
+    <div id="lotPickerList"></div>
+  </div>
+</div>
+<script>
+document.getElementById('closeLotPickerModal').onclick = () => {
+  document.getElementById('lotPickerModal').classList.add('hidden');
+};
+
+// Group user's owned blocks into contiguous lots
+function getUserLots() {
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!user) return [];
+  let ownedBlocks = Object.entries(purchasedBlocks)
+    .filter(([id, data]) => data.owner === user)
+    .map(([id, data]) => ({ id, ...data }));
+  let lots = [];
+  let visited = new Set();
+  function dfs(block, lot) {
+    visited.add(block.id);
+    lot.push(block);
+    const neighbors = [
+      `${(block.blockX/10)-1}_${block.blockY/10}`,
+      `${(block.blockX/10)+1}_${block.blockY/10}`,
+      `${block.blockX/10}_${(block.blockY/10)-1}`,
+      `${block.blockX/10}_${(block.blockY/10)+1}`
+    ];
+    for (let nId of neighbors) {
+      if (!visited.has(nId)) {
+        const nBlock = ownedBlocks.find(b => b.id === nId);
+        if (nBlock) dfs(nBlock, lot);
+      }
+    }
+  }
+  for (let block of ownedBlocks) {
+    if (!visited.has(block.id)) {
+      let lot = [];
+      dfs(block, lot);
+      lots.push(lot);
+    }
+  }
+  return lots.map(lotBlocks => {
+    const xs = lotBlocks.map(b => b.blockX);
+    const ys = lotBlocks.map(b => b.blockY);
+    return {
+      blocks: lotBlocks,
+      x: Math.min(...xs),
+      y: Math.min(...ys),
+      w: Math.max(...xs) - Math.min(...xs) + 10,
+      h: Math.max(...ys) - Math.min(...ys) + 10,
+      owner: user,
+      link: lotBlocks[0]?.targetURL || ''
+    };
+  });
+}
+
+function showLotPickerModal(lots) {
+  const modal = document.getElementById('lotPickerModal');
+  const list = document.getElementById('lotPickerList');
+  list.innerHTML = '';
+  lots.forEach((lot, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary w-full mb-2';
+    btn.textContent = `Lot #${idx + 1} (${lot.w}x${lot.h} at ${lot.x},${lot.y})`;
+    btn.onclick = () => {
+      modal.classList.add('hidden');
+      openDesignModal({ ...lot });
+    };
+    list.appendChild(btn);
+  });
+  modal.classList.remove('hidden');
+}
+
+// Enhanced canvas click handler for ownership/editing
+canvas.addEventListener('click',(e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/scale+offsetX);
+  const y=Math.floor((e.clientY-rect.top)/scale+offsetY);
+  const blockX=Math.floor(x/blockSize)*blockSize;
+  const blockY=Math.floor(y/blockSize)*blockSize;
+  const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
+  selectedBlock = { blockX, blockY, blockId };
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if(purchasedBlocks[blockId]) {
+    if (purchasedBlocks[blockId].owner === user) {
+      // User owns this block, find all their lots
+      const lots = getUserLots();
+      if (lots.length === 1) {
+        openDesignModal({ ...lots[0] });
+      } else {
+        showLotPickerModal(lots);
+      }
+    } else {
+      // Not owner, open link if exists
+      if(purchasedBlocks[blockId].targetURL) {
+        window.open(purchasedBlocks[blockId].targetURL,'_blank');
+      } else {
+        alert('This block is owned.');
+      }
+    }
+  } else {
+    // Not owned, open lot modal for 10x10 at this location
+    openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
+  }
+});
+</script>
+
+<!-- Firebase v10+ (module) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getFirestore, doc, getDocs, collection, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
+  authDomain: "echo-pixels.firebaseapp.com",
+  projectId: "echo-pixels",
+  storageBucket: "echo-pixels.appspot.com",
+  messagingSenderId: "666866433912",
+  appId: "1:666866433912:web:28c1a82bec77d46043528d",
+  measurementId: "G-QS33CX4R74"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const canvas = document.getElementById('pixelCanvas');
+const ctx = canvas.getContext('2d');
+const totalSize = 3000;
+const blockSize = 10;
+let scale = 0.2;
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false, dragStart = {};
+let purchasedBlocks = {};
+let selectedBlock = null;
+
+// For lot modal
+let lotModalOpen = false;
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  drawGrid();
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+// Real-time updates
+onSnapshot(collection(db, 'pixelBlocks'), (snapshot) => {
+  purchasedBlocks = {};
+  snapshot.forEach(doc => {
+    purchasedBlocks[doc.id] = doc.data();
+  });
+  drawGrid();
+});
+
+// Quick Buy buttons
+function openLotModal({startX, startY, w, h}) {
+  fillLotDropdowns();
+  document.getElementById('lotStartX').value = startX;
+  document.getElementById('lotStartY').value = startY;
+  document.getElementById('lotWidth').value = w;
+  document.getElementById('lotHeight').value = h;
+  updateLotPrice();
+  document.getElementById('lotBlockURL').value = '';
+  document.getElementById('lotModalStatus').textContent = '';
+  document.getElementById('lotModal').classList.remove('hidden');
+  lotModalOpen = true;
+}
+document.querySelectorAll('.quick-buy').forEach(btn => {
+  btn.onclick = () => {
+    openLotModal({
+      startX: btn.getAttribute('data-x'),
+      startY: btn.getAttribute('data-y'),
+      w: btn.getAttribute('data-w'),
+      h: btn.getAttribute('data-h')
+    });
+  };
+});
+
+// Design Modal logic (basic structure, drawing/upload/uploaded image, link, save)
+let currentDesignLot = null;
+function openDesignModal(lot) {
+  currentDesignLot = lot;
+  // Set up canvas size to lot size
+  const canvas = document.getElementById('designCanvas');
+  canvas.width = lot.w;
+  canvas.height = lot.h;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // TODO: Load existing design if present
+  document.getElementById('designLink').value = lot.link || '';
+  document.getElementById('designModalStatus').textContent = '';
+  document.getElementById('designModal').classList.remove('hidden');
+}
+document.getElementById('closeDesignModal').onclick = () => {
+  document.getElementById('designModal').classList.add('hidden');
+  currentDesignLot = null;
+};
+// Drawing logic (simple freehand)
+let drawing = false;
+let drawMode = 'draw';
+const designCanvas = document.getElementById('designCanvas');
+const drawColor = document.getElementById('drawColor');
+document.getElementById('drawMode').onclick = () => { drawMode = 'draw'; };
+document.getElementById('eraseMode').onclick = () => { drawMode = 'erase'; };
+designCanvas.addEventListener('mousedown', e => { drawing = true; });
+designCanvas.addEventListener('mouseup', e => { drawing = false; });
+designCanvas.addEventListener('mouseleave', e => { drawing = false; });
+designCanvas.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  const rect = designCanvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) * designCanvas.width / rect.width);
+  const y = Math.floor((e.clientY - rect.top) * designCanvas.height / rect.height);
+  const ctx = designCanvas.getContext('2d');
+  ctx.fillStyle = drawMode === 'draw' ? drawColor.value : '#fff';
+  ctx.fillRect(x, y, 2, 2);
+});
+// Upload image logic
+document.getElementById('uploadImage').onchange = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const ctx = designCanvas.getContext('2d');
+      ctx.clearRect(0,0,designCanvas.width,designCanvas.height);
+      ctx.drawImage(img, 0, 0, designCanvas.width, designCanvas.height);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+// Save design (store as dataURL and link in Firestore for the lot)
+document.getElementById('saveDesign').onclick = async function() {
+  if (!currentDesignLot) return;
+  const status = document.getElementById('designModalStatus');
+  status.textContent = 'Saving...';
+  const dataURL = designCanvas.toDataURL();
+  const link = document.getElementById('designLink').value;
+  // Save to all blocks in lot
+  try {
+    let promises = [];
+    for(let x=currentDesignLot.x;x<currentDesignLot.x+currentDesignLot.w;x+=10) {
+      for(let y=currentDesignLot.y;y<currentDesignLot.y+currentDesignLot.h;y+=10) {
+        const blockId = `${x/10}_${y/10}`;
+        if(purchasedBlocks[blockId] && purchasedBlocks[blockId].owner === currentDesignLot.owner) {
+          promises.push(setDoc(doc(db, 'pixelBlocks', blockId), {
+            ...purchasedBlocks[blockId],
+            design: dataURL,
+            targetURL: link,
+          }));
+        }
+      }
+    }
+    await Promise.all(promises);
+    status.textContent = 'Design saved!';
+    setTimeout(()=>{
+      document.getElementById('designModal').classList.add('hidden');
+      currentDesignLot = null;
+    }, 1200);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+};
+
+// Helper: fill dropdowns for lot modal
+function fillLotDropdowns() {
+  const xSel = document.getElementById('lotStartX');
+  const ySel = document.getElementById('lotStartY');
+  const wSel = document.getElementById('lotWidth');
+  const hSel = document.getElementById('lotHeight');
+  xSel.innerHTML = '';
+  ySel.innerHTML = '';
+  wSel.innerHTML = '';
+  hSel.innerHTML = '';
+  for(let i=0;i<=2990;i+=10) {
+    xSel.innerHTML += `<option value="${i}">${i}</option>`;
+    ySel.innerHTML += `<option value="${i}">${i}</option>`;
+  }
+  for(let i=10;i<=3000;i+=10) {
+    wSel.innerHTML += `<option value="${i}">${i}</option>`;
+    hSel.innerHTML += `<option value="${i}">${i}</option>`;
+  }
+}
+
+function getLotPrice(w, h) {
+  let pixels = w * h;
+  let price = pixels * 1.0; // $1 per pixel
+  let discount = 0;
+  if (pixels >= 10000) {
+    discount = 0.10;
+  } else if (pixels >= 2500) {
+    discount = 0.05;
+  }
+  if (discount > 0) price = price * (1 - discount);
+  return { price: price.toFixed(2), discount };
+}
+
+async function updateLotPrice() {
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const { price, discount } = getLotPrice(w, h);
+  document.getElementById('lotPrice').textContent = price;
+  document.getElementById('lotDiscount').textContent = discount === 0 ? '' : (discount === 0.05 ? '5% discount' : '10% discount');
+  // Always update SOL price live
+  document.getElementById('lotSolAmount').textContent = '...';
+  try {
+    const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    const data = await resp.json();
+    const solUsd = data.solana.usd;
+    const solPrice = (parseFloat(price) / solUsd).toFixed(4);
+    document.getElementById('lotSolAmount').textContent = solPrice;
+    if(window._pendingLot) window._pendingLot.solPrice = solPrice;
+  } catch {
+    document.getElementById('lotSolAmount').textContent = 'Error';
+  }
+}
+
+// Open lot modal
+document.getElementById('buyLotBtn').onclick = () => {
+  fillLotDropdowns();
+  updateLotPrice();
+  document.getElementById('lotBlockURL').value = '';
+  document.getElementById('lotModalStatus').textContent = '';
+  document.getElementById('lotModal').classList.remove('hidden');
+  lotModalOpen = true;
+};
+document.getElementById('closeLotModal').onclick = () => {
+  document.getElementById('lotModal').classList.add('hidden');
+  lotModalOpen = false;
+};
+['lotStartX','lotStartY','lotWidth','lotHeight'].forEach(id => {
+  document.getElementById(id).onchange = updateLotPrice;
+});
+
+// --- ENFORCE WALLET OWNERSHIP ON LOT PURCHASE ---
+document.getElementById('confirmLotPurchase').onclick = async () => {
+  const startX = parseInt(document.getElementById('lotStartX').value);
+  const startY = parseInt(document.getElementById('lotStartY').value);
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const url = document.getElementById('lotBlockURL').value;
+  const status = document.getElementById('lotModalStatus');
+  // ENFORCE WALLET CONNECTION
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet before purchasing.';
+    return;
+  }
+  // Check bounds
+  if(startX + w > 3000 || startY + h > 3000) {
+    status.textContent = 'Lot exceeds grid bounds.';
+    return;
+  }
+  // Check all blocks are open
+  let unavailable = false;
+  let toBuy = [];
+  for(let x=startX;x<startX+w;x+=10) {
+    for(let y=startY;y<startY+h;y+=10) {
+      const blockId = `${x/10}_${y/10}`;
+      if(purchasedBlocks[blockId]) unavailable = true;
+      toBuy.push(blockId);
+    }
+  }
+  if(unavailable) {
+    status.textContent = 'Some blocks in this lot are already owned. Please choose another lot.';
+    return;
+  }
+  // Save lot info for payment step
+  window._pendingLot = { startX, startY, w, h, url, toBuy, owner };
+  // Show payment step
+  document.getElementById('lotStep1').classList.add('hidden');
+  document.getElementById('lotStep2').classList.remove('hidden');
+  // Fetch live SOL/USD price and calculate SOL amount
+  const usd = w * h * 1.0; // $1 per pixel
+  document.getElementById('lotPrice').textContent = usd.toFixed(2);
+  document.getElementById('lotSolAmount').textContent = '...';
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
+    .then(r => r.json())
+    .then(data => {
+      const solUsd = data.solana.usd;
+      const solPrice = (usd / solUsd).toFixed(4);
+      document.getElementById('lotSolAmount').textContent = solPrice;
+      window._pendingLot.solPrice = solPrice;
+    })
+    .catch(() => {
+      document.getElementById('lotSolAmount').textContent = 'Error';
+    });
+};
+
+// --- AFTER PAYMENT, LOCK LOT TO WALLET AND OPEN EDIT WINDOW ---
+document.getElementById('confirmPaymentSent').onclick = async () => {
+  const status = document.getElementById('lotModalStatus');
+  status.textContent = 'Checking for payment...';
+  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
+  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet first.';
+    return;
+  }
+  try {
+    const connection = new solanaWeb3.Connection(
+      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
+      'confirmed'
+    );
+    const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
+    let found = false;
+    let txSignature = null;
+    for (let sig of sigs) {
+      const tx = await connection.getTransaction(sig.signature);
+      if (!tx) continue;
+      const from = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[0].toString());
+      const to = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[1].toString());
+      if (from.equals(new solanaWeb3.PublicKey(owner)) && to.equals(new solanaWeb3.PublicKey(recipient))) {
+        const instr = tx.transaction.message.instructions[0];
+        if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
+          const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
+          if (Math.abs(amt - solPrice) < 0.001) {
+            found = true;
+            txSignature = sig.signature;
+            break;
+          }
+        }
+      }
+    }
+    if (found) {
+      status.textContent = 'Payment confirmed! Locking your lot...';
+      document.getElementById('lotStep2').classList.add('hidden');
+      document.getElementById('lotStep3').classList.remove('hidden');
+      // Mark blocks as purchased and open design modal
+      const lot = window._pendingLot;
+      try {
+        // Optimistically update local purchasedBlocks for immediate UI feedback
+        lot.toBuy.forEach(blockId => {
+          purchasedBlocks[blockId] = {
+            owner: lot.owner,
+            blockX: parseInt(blockId.split('_')[0])*10,
+            blockY: parseInt(blockId.split('_')[1])*10,
+            targetURL: lot.url,
+            purchasedAt: new Date().toISOString(),
+            txSignature: txSignature
+          };
+        });
+        drawGrid();
+        // Write to Firestore
+        const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+          owner: lot.owner,
+          blockX: parseInt(blockId.split('_')[0])*10,
+          blockY: parseInt(blockId.split('_')[1])*10,
+          targetURL: lot.url,
+          purchasedAt: new Date().toISOString(),
+          txSignature: txSignature
+        }));
+        await Promise.all(promises);
+        // Open design modal for this lot (owner only)
+        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner: lot.owner, link: lot.url });
+        document.getElementById('lotModal').classList.add('hidden');
+        lotModalOpen = false;
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+      }
+    } else {
+      status.textContent = 'Payment not found yet. Please wait a minute and try again.';
+    }
+  } catch (e) {
+    status.textContent = 'Error checking payment: ' + e.message;
+  }
+};
+
+document.getElementById('openDesignLot').onclick = async () => {
+  // Mark blocks as purchased and open design modal
+  const lot = window._pendingLot;
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
+  try {
+    // Optimistically update local purchasedBlocks for immediate UI feedback
+    lot.toBuy.forEach(blockId => {
+      purchasedBlocks[blockId] = {
+        owner,
+        blockX: parseInt(blockId.split('_')[0])*10,
+        blockY: parseInt(blockId.split('_')[1])*10,
+        targetURL: lot.url,
+        purchasedAt: new Date().toISOString(),
+      };
+    });
+    drawGrid();
+    const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+      owner,
+      blockX: parseInt(blockId.split('_')[0])*10,
+      blockY: parseInt(blockId.split('_')[1])*10,
+      targetURL: lot.url,
+      purchasedAt: new Date().toISOString(),
+    }));
+    await Promise.all(promises);
+    document.getElementById('lotModal').classList.add('hidden');
+    lotModalOpen = false;
+    // Open design modal for this lot (owner only)
+    openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner, link: lot.url });
+  } catch (e) {
+    document.getElementById('lotModalStatus').textContent = 'Error: ' + e.message;
+  }
+};
+
+function drawGrid() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cols = Math.ceil(canvas.width/(blockSize*scale));
+  const rows = Math.ceil(canvas.height/(blockSize*scale));
+  const startCol = Math.floor(offsetX/blockSize);
+  const startRow = Math.floor(offsetY/blockSize);
+  for(let i=-1;i<cols+1;i++) {
+    for(let j=-1;j<rows+1;j++) {
+      const x=(startCol+i)*blockSize, y=(startRow+j)*blockSize;
+      if(x<0||y<0||x>=totalSize||y>=totalSize)continue;
+      const screenX=(x-offsetX)*scale, screenY=(y-offsetY)*scale, s=blockSize*scale;
+      const id=`${x/blockSize}_${y/blockSize}`;
+      if(purchasedBlocks[id]) {
+        ctx.fillStyle="#0066ff";
+      }else{
+        ctx.fillStyle="#050b1f";
+      }
+      ctx.fillRect(screenX,screenY,s,s);
+      ctx.strokeStyle="#003366";
+      ctx.strokeRect(screenX,screenY,s,s);
+      // Show link icon if purchased
+      if(purchasedBlocks[id] && s > 12) {
+        ctx.font = `${Math.floor(s*0.7)}px Arial`;
+        ctx.fillStyle = "#fff";
+        ctx.fillText("🔗", screenX+s/4, screenY+s*0.7);
+      }
+    }
+  }
+}
+
+canvas.addEventListener('wheel',(e)=>{
+  e.preventDefault();
+  const zoom=e.deltaY*-0.001;
+  scale=Math.min(Math.max(scale*(1+zoom),0.02),12); // allow up to 12x zoom
+  drawGrid();
+});
+
+// Add zoom in/out buttons
+const zoomControls = document.createElement('div');
+zoomControls.style.position = 'absolute';
+zoomControls.style.top = '20px';
+zoomControls.style.right = '20px';
+zoomControls.style.zIndex = 10;
+zoomControls.innerHTML = `
+  <button id="zoomInBtn" style="background:#0066ff;color:#fff;padding:8px 16px;border-radius:8px;margin-bottom:6px;display:block;">Zoom In +</button>
+  <button id="zoomOutBtn" style="background:#0066ff;color:#fff;padding:8px 16px;border-radius:8px;display:block;">Zoom Out -</button>
+`;
+canvas.parentElement.appendChild(zoomControls);
+document.getElementById('zoomInBtn').onclick = () => {
+  scale = Math.min(12, scale + 0.5);
+  drawGrid();
+};
+document.getElementById('zoomOutBtn').onclick = () => {
+  scale = Math.max(0.02, scale - 0.5);
+  drawGrid();
+};
+
+// DEV: Unlock block button for admin (for now, only visible if window.location.hash==="#dev")
+if (window.location.hash === "#dev") {
+  const unlockBtn = document.createElement('button');
+  unlockBtn.textContent = 'Unlock Block (DEV)';
+  unlockBtn.style.position = 'fixed';
+  unlockBtn.style.bottom = '30px';
+  unlockBtn.style.right = '30px';
+  unlockBtn.style.background = '#ff0066';
+  unlockBtn.style.color = '#fff';
+  unlockBtn.style.padding = '12px 24px';
+  unlockBtn.style.borderRadius = '8px';
+  unlockBtn.style.zIndex = 1000;
+  document.body.appendChild(unlockBtn);
+  unlockBtn.onclick = async () => {
+    const blockId = prompt('Enter blockId to unlock (e.g. 0_0):');
+    if (!blockId) return;
+    try {
+      await setDoc(doc(db, 'pixelBlocks', blockId), {}, { merge: false });
+      alert('Block unlocked.');
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  };
+}
+
+canvas.addEventListener('mousedown',(e)=>{
+  isDragging=true; dragStart={x:e.clientX,y:e.clientY};
+});
+canvas.addEventListener('mousemove',(e)=>{
+  if(!isDragging)return;
+  offsetX-=(e.clientX-dragStart.x)/scale;
+  offsetY-=(e.clientY-dragStart.y)/scale;
+  dragStart={x:e.clientX,y:e.clientY};
+  requestAnimationFrame(drawGrid);
+});
+canvas.addEventListener('mouseup',()=>isDragging=false);
+canvas.addEventListener('mouseleave',()=>isDragging=false);
+
+canvas.addEventListener('click',(e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/scale+offsetX);
+  const y=Math.floor((e.clientY-rect.top)/scale+offsetY);
+  const blockX=Math.floor(x/blockSize)*blockSize;
+  const blockY=Math.floor(y/blockSize)*blockSize;
+  const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
+  selectedBlock = { blockX, blockY, blockId };
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if(purchasedBlocks[blockId]) {
+    if (purchasedBlocks[blockId].owner === user) {
+      // User owns this block, find all their lots
+      const lots = getUserLots();
+      if (lots.length === 1) {
+        openDesignModal({ ...lots[0] });
+      } else {
+        showLotPickerModal(lots);
+      }
+    } else {
+      // Not owner, open link if exists
+      if(purchasedBlocks[blockId].targetURL) {
+        window.open(purchasedBlocks[blockId].targetURL,'_blank');
+      } else {
+        alert('This block is owned.');
+      }
+    }
+  } else {
+    // Not owned, but double-check: prevent purchase modal for already-owned lots (race condition)
+    let owned = false;
+    for(let x=blockX;x<blockX+10;x+=10) {
+      for(let y=blockY;y<blockY+10;y+=10) {
+        const id = `${x/10}_${y/10}`;
+        if(purchasedBlocks[id]) owned = true;
+      }
+    }
+    if(owned) {
+      alert('This lot is already owned.');
+      return;
+    }
+    openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
+  }
+});
+
+// Modal logic
+document.getElementById('closeModal').onclick = () => {
+  document.getElementById('purchaseModal').classList.add('hidden');
+};
+
+document.getElementById('confirmPurchase').onclick = async () => {
+  if(!selectedBlock) return;
+  const url = document.getElementById('modalBlockURL').value;
+  const status = document.getElementById('modalStatus');
+  status.textContent = 'Processing...';
+  // Simulate wallet connect (replace with real wallet logic)
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
+  try {
+    await setDoc(doc(db, 'pixelBlocks', selectedBlock.blockId), {
+      owner,
+      blockX: selectedBlock.blockX,
+      blockY: selectedBlock.blockY,
+      targetURL: url,
+      purchasedAt: new Date().toISOString(),
+    });
+    status.textContent = 'Success! Block purchased.';
+    setTimeout(()=>{
+      document.getElementById('purchaseModal').classList.add('hidden');
+    }, 1200);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+};
+
+// --- ENFORCE WALLET OWNERSHIP ON LOT PURCHASE ---
+document.getElementById('confirmLotPurchase').onclick = async () => {
+  const startX = parseInt(document.getElementById('lotStartX').value);
+  const startY = parseInt(document.getElementById('lotStartY').value);
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const url = document.getElementById('lotBlockURL').value;
+  const status = document.getElementById('lotModalStatus');
+  // ENFORCE WALLET CONNECTION
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet before purchasing.';
+    return;
+  }
+  // Check bounds
+  if(startX + w > 3000 || startY + h > 3000) {
+    status.textContent = 'Lot exceeds grid bounds.';
+    return;
+  }
+  // Check all blocks are open
+  let unavailable = false;
+  let toBuy = [];
+  for(let x=startX;x<startX+w;x+=10) {
+    for(let y=startY;y<startY+h;y+=10) {
+      const blockId = `${x/10}_${y/10}`;
+      if(purchasedBlocks[blockId]) unavailable = true;
+      toBuy.push(blockId);
+    }
+  }
+  if(unavailable) {
+    status.textContent = 'Some blocks in this lot are already owned. Please choose another lot.';
+    return;
+  }
+  // Save lot info for payment step
+  window._pendingLot = { startX, startY, w, h, url, toBuy, owner };
+  // Show payment step
+  document.getElementById('lotStep1').classList.add('hidden');
+  document.getElementById('lotStep2').classList.remove('hidden');
+  // Fetch live SOL/USD price and calculate SOL amount
+  const usd = w * h * 1.0; // $1 per pixel
+  document.getElementById('lotPrice').textContent = usd.toFixed(2);
+  document.getElementById('lotSolAmount').textContent = '...';
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
+    .then(r => r.json())
+    .then(data => {
+      const solUsd = data.solana.usd;
+      const solPrice = (usd / solUsd).toFixed(4);
+      document.getElementById('lotSolAmount').textContent = solPrice;
+      window._pendingLot.solPrice = solPrice;
+    })
+    .catch(() => {
+      document.getElementById('lotSolAmount').textContent = 'Error';
+    });
+};
+
+// --- AFTER PAYMENT, LOCK LOT TO WALLET AND OPEN EDIT WINDOW ---
+document.getElementById('confirmPaymentSent').onclick = async () => {
+  const status = document.getElementById('lotModalStatus');
+  status.textContent = 'Checking for payment...';
+  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
+  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet first.';
+    return;
+  }
+  try {
+    const connection = new solanaWeb3.Connection(
+      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
+      'confirmed'
+    );
+    const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
+    let found = false;
+    let txSignature = null;
+    for (let sig of sigs) {
+      const tx = await connection.getTransaction(sig.signature);
+      if (!tx) continue;
+      const from = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[0].toString());
+      const to = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[1].toString());
+      if (from.equals(new solanaWeb3.PublicKey(owner)) && to.equals(new solanaWeb3.PublicKey(recipient))) {
+        const instr = tx.transaction.message.instructions[0];
+        if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
+          const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
+          if (Math.abs(amt - solPrice) < 0.001) {
+            found = true;
+            txSignature = sig.signature;
+            break;
+          }
+        }
+      }
+    }
+    if (found) {
+      status.textContent = 'Payment confirmed! Locking your lot...';
+      document.getElementById('lotStep2').classList.add('hidden');
+      document.getElementById('lotStep3').classList.remove('hidden');
+      // Mark blocks as purchased and open design modal
+      const lot = window._pendingLot;
+      try {
+        const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+          owner: lot.owner,
+          blockX: parseInt(blockId.split('_')[0])*10,
+          blockY: parseInt(blockId.split('_')[1])*10,
+          targetURL: lot.url,
+          purchasedAt: new Date().toISOString(),
+          txSignature: txSignature
+        }));
+        await Promise.all(promises);
+        // Open design modal for this lot
+        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner: lot.owner, link: lot.url });
+        document.getElementById('lotModal').classList.add('hidden');
+        lotModalOpen = false;
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+      }
+    } else {
+      status.textContent = 'Payment not found yet. Please wait a minute and try again.';
+    }
+  } catch (e) {
+    status.textContent = 'Error checking payment: ' + e.message;
+  }
+};
+</script>
+
+
+</body>
+</html>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
