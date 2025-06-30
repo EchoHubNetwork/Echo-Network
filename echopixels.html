@@ -1013,7 +1013,7 @@ document.getElementById('openWalletPay').onclick = async () => {
       'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
       'confirmed'
     );
-    const fromPubkey = phantomStatus.publicKey; // Use the PublicKey instance directly
+    const fromPubkey = new solanaWeb3.PublicKey(phantomStatus.publicKey.toString());
     const toPubkey = new solanaWeb3.PublicKey(recipient);
 
     const transaction = new solanaWeb3.Transaction().add(
@@ -1043,15 +1043,15 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
   status.textContent = 'Checking for payment...';
   const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
   const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
-  let fromPubkey = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  let fromPubkey = window.solana && window.solana.publicKey ? new solanaWeb3.PublicKey(window.solana.publicKey.toString()) : null;
   if (!fromPubkey) {
     status.textContent = 'Connect your wallet first.';
     return;
   }
   try {
-    // IMPORTANT: Replace the URL below with your own QuickNode or Alchemy Solana RPC endpoint
+    // Using dedicated QuickNode Solana RPC endpoint
     const connection = new solanaWeb3.Connection(
-      'https://your-unique-rpc.solana-mainnet.quiknode.pro/REPLACE_WITH_YOURS',
+      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
       'confirmed'
     );
     // Look for a recent transaction from user to recipient for the right amount
@@ -1060,9 +1060,9 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
     for (let sig of sigs) {
       const tx = await connection.getTransaction(sig.signature);
       if (!tx) continue;
-      const from = tx.transaction.message.accountKeys[0].toString();
-      const to = tx.transaction.message.accountKeys[1].toString();
-      if (from === fromPubkey && to === recipient) {
+      const from = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[0].toString());
+      const to = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[1].toString());
+      if (from.equals(fromPubkey) && to.equals(new solanaWeb3.PublicKey(recipient))) {
         // Check amount
         const instr = tx.transaction.message.instructions[0];
         if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
