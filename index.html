@@ -1,1217 +1,1304 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EchoPixels | EchoHub Network</title>
+<!-- saved from url=(0140)https://bb9f9jf9cxmj2pjt.canva-hosted-embed.com/codelet/AAEAEGJiOWY5amY5Y3htajJwanQAAAAAAZbWN5L_lTqhoZ3C6MVfB_A4E9QgwtlRPz0Q76wG4cdX21ntj-8/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<!-- Phantom Wallet Connection -->
 
-  <!-- Tailwind & your compiled CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="all.min.css" />
-
-<!-- Solana Phantom Wallet Connection -->
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 <script>
-// Robust Phantom wallet detection and connection overhaul
-let phantomStatus = {
-  connected: false,
-  publicKey: null,
-  provider: null
-};
+  async function connectWallet() {
+    const isPhantomInstalled = window.solana && window.solana.isPhantom;
+    if (isPhantomInstalled) {
+      try {
+        const resp = await window.solana.connect();
+        const walletAddress = resp.publicKey.toString();
+        console.log("Connected to wallet:", walletAddress);
+        alert(`Wallet connected: ${walletAddress}`);
+        // Store wallet address for future transactions
+      } catch (err) {
+        console.error(err);
+        alert("Wallet connection failed.");
+      }
+    } else {
+      alert("Phantom Wallet not found. Please install it first.");
+    }
+  }
 
-function updateWalletUI() {
-  const btn = document.getElementById('connect-wallet');
-  if (!btn) return;
-  if (phantomStatus.connected && phantomStatus.publicKey) {
-    btn.textContent = 'Wallet: ' + phantomStatus.publicKey.slice(0,4) + '...' + phantomStatus.publicKey.slice(-4);
-    btn.disabled = true;
-    btn.classList.add('opacity-60');
-  } else {
-    btn.textContent = 'Connect Wallet';
-    btn.disabled = false;
-    btn.classList.remove('opacity-60');
+  function toggleSection(section) {
+    var content = document.getElementById(section + '-content');
+    var toggle = document.getElementById(section + '-toggle');
+    if (content) {
+      content.classList.toggle('active');
+    }
+    if (toggle) {
+      toggle.classList.toggle('active');
+    }
   }
-}
 
-async function detectPhantomProvider() {
-  if (window.solana && window.solana.isPhantom) {
-    phantomStatus.provider = window.solana;
-    window.solana.on('connect', () => {
-      phantomStatus.connected = true;
-      phantomStatus.publicKey = window.solana.publicKey.toString();
-      updateWalletUI();
-    });
-    window.solana.on('disconnect', () => {
-      phantomStatus.connected = false;
-      phantomStatus.publicKey = null;
-      updateWalletUI();
-    });
-    window.solana.on('accountChanged', (pubkey) => {
-      phantomStatus.publicKey = pubkey ? pubkey.toString() : null;
-      phantomStatus.connected = !!pubkey;
-      updateWalletUI();
-    });
-    updateWalletUI();
-    return true;
-  } else {
-    phantomStatus.provider = null;
-    updateWalletUI();
-    return false;
-  }
-}
-
-async function connectPhantomWallet() {
-  if (!phantomStatus.provider) {
-    alert('Phantom Wallet not found. Please install it from https://phantom.app and refresh the page.');
-    return;
-  }
-  try {
-    const resp = await phantomStatus.provider.connect();
-    phantomStatus.connected = true;
-    phantomStatus.publicKey = resp.publicKey.toString();
-    updateWalletUI();
-    alert(`Wallet connected: ${phantomStatus.publicKey}`);
-  } catch (err) {
-    phantomStatus.connected = false;
-    phantomStatus.publicKey = null;
-    updateWalletUI();
-    alert('Wallet connection failed.');
-    console.error(err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  // Try to detect Phantom every 500ms for 5 seconds
-  let tries = 0;
-  let found = false;
-  while (tries < 10 && !found) {
-    found = await detectPhantomProvider();
-    if (!found) await new Promise(res => setTimeout(res, 500));
-    tries++;
-  }
-  // Add click handler
-  const btn = document.getElementById('connect-wallet');
-  if (btn) btn.onclick = connectPhantomWallet;
-});
+  document.addEventListener("DOMContentLoaded", function() {
+    var connectWalletBtn = document.getElementById('connect-wallet');
+    var connectWalletMobileBtn = document.getElementById('connect-wallet-mobile');
+    if (connectWalletBtn) connectWalletBtn.addEventListener('click', connectWallet);
+    if (connectWalletMobileBtn) connectWalletMobileBtn.addEventListener('click', connectWallet);
+  });
 </script>
 
+        
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoHubNetwork - The Signal Remains. A Network Awakens.</title>
+    <script src="./saved_resource"></script>
+    <link rel="stylesheet" href="./all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #0066ff;
+            --primary-dark: #0044cc;
+            --secondary: #00ccff;
+            --accent: #ff00cc;
+            --dark: #050b1f;
+            --darker: #030612;
+            --light: #e0e7ff;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(to bottom, var(--darker), var(--dark));
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .glow {
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+        }
+        
+        .glow-accent {
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(0, 102, 255, 0.7);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+            z-index: -1;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .card {
+            background: rgba(5, 11, 31, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+            border-color: rgba(0, 102, 255, 0.5);
+        }
+        
+        .echo-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            z-index: -1;
+        }
+        
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 4s infinite;
+        }
+        
+        .ring:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            animation-delay: 0s;
+        }
+        
+        .ring:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            animation-delay: 1s;
+        }
+        
+        .ring:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            animation-delay: 2s;
+        }
+        
+        .ring:nth-child(4) {
+            width: 400px;
+            height: 400px;
+            animation-delay: 3s;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0.8;
+                border-color: var(--primary);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+                border-color: var(--secondary);
+            }
+        }
+        
+        .pixel-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            width: 100%;
+            aspect-ratio: 1/1;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .pixel {
+            background: rgba(0, 102, 255, 0.2);
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+        
+        .pixel.filled {
+            background: var(--primary);
+        }
+        
+        .pixel:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+        
+        .tokenomics-chart {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        
+        .sticky-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(5, 11, 31, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            z-index: 100;
+            display: flex;
+            gap: 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
+        }
+        
+        .sticky-nav a {
+            color: var(--light);
+            transition: all 0.3s ease;
+        }
+        
+        .sticky-nav a:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .countdown {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(5, 11, 31, 0.7);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            min-width: 80px;
+        }
+        
+        .countdown-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .countdown-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .hub-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .new-badge {
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+        
+        .roadmap-timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .roadmap-timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+        }
+        
+        .roadmap-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        
+        .roadmap-container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background: var(--primary);
+            border: 4px solid var(--secondary);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px var(--primary);
+        }
+        
+        .left {
+            left: 0;
+        }
+        
+        .right {
+            left: 50%;
+        }
+        
+        .left::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            right: 30px;
+            border: medium solid rgba(0, 102, 255, 0.2);
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent rgba(0, 102, 255, 0.2);
+        }
+        
+        .right::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            left: 30px;
+            border: medium solid rgba(0, 102, 255, 0.2);
+            border-width: 10px 10px 10px 0;
+            border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+        }
+        
+        .right::after {
+            left: -10px;
+        }
+        
+        .roadmap-content {
+            padding: 20px 30px;
+            background: rgba(5, 11, 31, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            border-radius: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .roadmap-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+            border-color: rgba(0, 102, 255, 0.5);
+        }
+        
+        .roadmap-date {
+            display: inline-block;
+            padding: 5px 15px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .whitepaper-section {
+            background: rgba(5, 11, 31, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .whitepaper-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .whitepaper-header:hover {
+            background: rgba(0, 102, 255, 0.1);
+        }
+        
+        .whitepaper-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            padding: 0 1.5rem;
+        }
+        
+        .whitepaper-content.active {
+            max-height: 1000px;
+            padding: 0 1.5rem 1.5rem;
+        }
+        
+        .whitepaper-toggle {
+            transition: transform 0.3s ease;
+        }
+        
+        .whitepaper-toggle.active {
+            transform: rotate(180deg);
+        }
+        
+        @media screen and (max-width: 768px) {
+            .roadmap-timeline::after {
+                left: 31px;
+            }
+            
+            .roadmap-container {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .roadmap-container::before {
+                left: 60px;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
+            }
+            
+            .left::after, .right::after {
+                left: 21px;
+            }
+            
+            .right {
+                left: 0;
+            }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-10{bottom:2.5rem}.left-1\/2{left:50%}.top-0{top:0px}.z-10{z-index:10}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.mb-1{margin-bottom:0.25rem}.mb-12{margin-bottom:3rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.ml-2{margin-left:0.5rem}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mr-4{margin-right:1rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-8{margin-top:2rem}.mt-auto{margin-top:auto}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-3{height:0.75rem}.h-32{height:8rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-8{height:2rem}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-3{width:0.75rem}.w-32{width:8rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-8{width:2rem}.w-full{width:100%}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.flex-shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-12{gap:3rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-x-8 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(2rem * var(--tw-space-x-reverse));margin-left:calc(2rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-blue-900\/30{border-color:rgb(30 58 138 / 0.3)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-blue-600\/20{background-color:rgb(37 99 235 / 0.2)}.bg-cyan-400{--tw-bg-opacity:1;background-color:rgb(34 211 238 / var(--tw-bg-opacity, 1))}.bg-gray-900{--tw-bg-opacity:1;background-color:rgb(17 24 39 / var(--tw-bg-opacity, 1))}.bg-gray-900\/30{background-color:rgb(17 24 39 / 0.3)}.bg-gray-900\/50{background-color:rgb(17 24 39 / 0.5)}.bg-pink-500{--tw-bg-opacity:1;background-color:rgb(236 72 153 / var(--tw-bg-opacity, 1))}.bg-opacity-50{--tw-bg-opacity:0.5}.bg-opacity-80{--tw-bg-opacity:0.8}.bg-opacity-95{--tw-bg-opacity:0.95}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-20{padding-top:5rem;padding-bottom:5rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-4{padding-bottom:1rem}.pl-6{padding-left:1.5rem}.pt-16{padding-top:4rem}.pt-2{padding-top:0.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-5xl{font-size:3rem;line-height:1}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-50{opacity:0.5}.opacity-60{opacity:0.6}.opacity-70{opacity:0.7}.opacity-80{opacity:0.8}.ring{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-blue-900\/30:hover{background-color:rgb(30 58 138 / 0.3)}.hover\:text-blue-400:hover{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}@media (min-width: 768px){.md\:flex{display:flex}.md\:hidden{display:none}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-7xl{font-size:4.5rem;line-height:1}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+      <!-- Navigation -->
+      <header class="fixed top-0 w-full z-50 bg-opacity-80 bg-gray-900 backdrop-blur-md border-b border-blue-900/30">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      
+          <!-- Logo -->
+          <a href="saved_resource(1).html" class="flex items-center">
+            <!-- your SVG logo -->
+            <span class="text-xl font-bold tracking-wider">
+              ECHOHUB<span class="gradient-text">NETWORK</span>
+            </span>
+          </a>
+      
+          <!-- Desktop Links -->
+          <div class="flex items-center space-x-6">
+            <nav class="hidden md:flex space-x-8">
+              <a href="saved_resource(1).html#about" class="hover:underline">About</a>
+              <a href="saved_resource(1).html#sub-hubs" class="hover:underline">Sub-Hubs</a>
+              <a href="saved_resource(1).html#tokenomics" class="hover:underline">Tokenomics</a>
+              <a href="saved_resource(1).html#whitepaper" class="hover:underline">Whitepaper</a>
+              <a href="saved_resource(1).html#roadmap" class="hover:underline">Roadmap</a>
+              <a href="saved_resource(1).html#join" class="hover:underline">Join</a>
+            </nav>
+      
+            <!-- Connect Wallet button (desktop) -->
+            <button
+              id="connect-wallet"
+              class="btn-primary ml-4 hidden md:inline-flex items-center"
+            >
+              Connect Wallet
+            </button>
+          </div>
+      
+          <!-- Mobile Hamburger -->
+          <div class="md:hidden">
+            <button id="menu-toggle" class="text-white">
+              <!-- hamburger SVG -->
+            </button>
+          </div>
+        </div>
+      
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
+          <div class="px-2 pt-2 pb-4 space-y-1 text-center">
+            <a href="saved_resource(1).html#about" class="block py-2 hover:underline">About</a>
+            <a href="saved_resource(1).html#sub-hubs" class="block py-2 hover:underline">Sub-Hubs</a>
+            <a href="saved_resource(1).html#tokenomics" class="block py-2 hover:underline">Tokenomics</a>
+            <a href="saved_resource(1).html#whitepaper" class="block py-2 hover:underline">Whitepaper</a>
+            <a href="saved_resource(1).html#roadmap" class="block py-2 hover:underline">Roadmap</a>
+            <a href="saved_resource(1).html#join" class="block py-2 hover:underline">Join</a>
+            <!-- Connect Wallet (mobile) -->
+            <button
+              id="connect-wallet-mobile"
+              class="btn-primary w-full mt-2 inline-flex justify-center"
+            >
+              Connect Wallet
+            </button>
+          </div>
+        </div>
+      </header>
+      
 
-  <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
-      
-      :root {
-          --primary: #0066ff;
-          --primary-dark: #0044cc;
-          --secondary: #00ccff;
-          --accent: #ff00cc;
-          --dark: #050b1f;
-          --darker: #030612;
-          --light: #e0e7ff;
-      }
-      
-      html {
-          scroll-behavior: smooth;
-      }
-      
-      body {
-          font-family: 'Rajdhani', sans-serif;
-          background: linear-gradient(to bottom, var(--darker), var(--dark));
-          color: var(--light);
-          overflow-x: hidden;
-      }
-      
-      h1, h2, h3, h4, h5, h6 {
-          font-family: 'Orbitron', sans-serif;
-      }
-      
-      .glow {
-          filter: drop-shadow(0 0 8px var(--primary));
-      }
-      
-      .glow-text {
-          text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
-      }
-      
-      .glow-accent {
-          filter: drop-shadow(0 0 8px var(--accent));
-      }
-      
-      .gradient-text {
-          background: linear-gradient(90deg, var(--primary), var(--secondary));
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-      }
-      
-      .btn-primary {
-          background: linear-gradient(90deg, var(--primary), var(--secondary));
-          color: white;
-          font-family: 'Orbitron', sans-serif;
-          padding: 0.75rem 2rem;
-          border-radius: 0.5rem;
-          font-weight: 600;
-          letter-spacing: 1px;
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-          z-index: 1;
-          box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
-      }
-      
-      .btn-primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 0 25px rgba(0, 102, 255, 0.7);
-      }
-      
-      .btn-primary::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-          transition: all 0.6s ease;
-          z-index: -1;
-      }
-      
-      .btn-primary:hover::before {
-          left: 100%;
-      }
-      
-      .card {
-          background: rgba(5, 11, 31, 0.7);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(0, 102, 255, 0.2);
-          border-radius: 1rem;
-          overflow: hidden;
-          transition: all 0.3s ease;
-      }
-      
-      .card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
-          border-color: rgba(0, 102, 255, 0.5);
-      }
-      
-      .echo-rings {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 500px;
-          height: 500px;
-          z-index: -1;
-      }
-      
-      .ring {
-          position: absolute;
-          border-radius: 50%;
-          border: 2px solid var(--primary);
-          opacity: 0;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          animation: pulse 4s infinite;
-      }
-      
-      .ring:nth-child(1) {
-          width: 100px;
-          height: 100px;
-          animation-delay: 0s;
-      }
-      
-      .ring:nth-child(2) {
-          width: 200px;
-          height: 200px;
-          animation-delay: 1s;
-      }
-      
-      .ring:nth-child(3) {
-          width: 300px;
-          height: 300px;
-          animation-delay: 2s;
-      }
-      
-      .ring:nth-child(4) {
-          width: 400px;
-          height: 400px;
-          animation-delay: 3s;
-      }
-      
-      @keyframes pulse {
-          0% {
-              transform: translate(-50%, -50%) scale(0.5);
-              opacity: 0.8;
-              border-color: var(--primary);
-          }
-          100% {
-              transform: translate(-50%, -50%) scale(1.5);
-              opacity: 0;
-              border-color: var(--secondary);
-          }
-      }
-      
-      .pixel-grid {
-          display: grid;
-          grid-template-columns: repeat(10, 1fr);
-          gap: 2px;
-          width: 100%;
-          aspect-ratio: 1/1;
-          max-width: 300px;
-          margin: 0 auto;
-      }
-      
-      .pixel {
-          background: rgba(0, 102, 255, 0.2);
-          border-radius: 2px;
-          transition: all 0.2s ease;
-      }
-      
-      .pixel.filled {
-          background: var(--primary);
-      }
-      
-      .pixel:hover {
-          background: var(--secondary);
-          transform: scale(1.1);
-      }
-      
-      .tokenomics-chart {
-          position: relative;
-          width: 100%;
-          max-width: 300px;
-          height: 300px;
-          margin: 0 auto;
-      }
-      
-      .sticky-nav {
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(5, 11, 31, 0.8);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(0, 102, 255, 0.3);
-          border-radius: 50px;
-          padding: 0.5rem 1.5rem;
-          z-index: 100;
-          display: flex;
-          gap: 1.5rem;
-          box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
-      }
-      
-      .sticky-nav a {
-          color: var(--light);
-          transition: all 0.3s ease;
-      }
-      
-      .sticky-nav a:hover {
-          color: var(--primary);
-          transform: translateY(-3px);
-      }
-      
-      .countdown {
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          margin: 2rem 0;
-      }
-      
-      .countdown-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background: rgba(5, 11, 31, 0.7);
-          border: 1px solid rgba(0, 102, 255, 0.3);
-          border-radius: 0.5rem;
-          padding: 0.5rem 1rem;
-          min-width: 80px;
-      }
-      
-      .countdown-value {
-          font-size: 2rem;
-          font-weight: 700;
-          color: var(--primary);
-      }
-      
-      .countdown-label {
-          font-size: 0.8rem;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-      }
-      
-      .hub-icon {
-          font-size: 2rem;
-          margin-bottom: 1rem;
-          color: var(--primary);
-      }
-      
-      .new-badge {
-          background: linear-gradient(90deg, var(--accent), var(--secondary));
-          color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 1rem;
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          position: absolute;
-          top: 1rem;
-          right: 1rem;
-      }
-      
-      .roadmap-timeline {
-          position: relative;
-          max-width: 1200px;
-          margin: 0 auto;
-      }
-      
-      .roadmap-timeline::after {
-          content: '';
-          position: absolute;
-          width: 6px;
-          background: linear-gradient(to bottom, var(--primary), var(--secondary));
-          top: 0;
-          bottom: 0;
-          left: 50%;
-          margin-left: -3px;
-          border-radius: 3px;
-      }
-      
-      .roadmap-container {
-          padding: 10px 40px;
-          position: relative;
-          background-color: inherit;
-          width: 50%;
-      }
-      
-      .roadmap-container::after {
-          content: '';
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          right: -10px;
-          background: var(--primary);
-          border: 4px solid var(--secondary);
-          top: 15px;
-          border-radius: 50%;
-          z-index: 1;
-          box-shadow: 0 0 10px var(--primary);
-      }
-      
-      .left {
-          left: 0;
-      }
-      
-      .right {
-          left: 50%;
-      }
-      
-      .left::before {
-          content: " ";
-          height: 0;
-          position: absolute;
-          top: 22px;
-          width: 0;
-          z-index: 1;
-          right: 30px;
-          border: medium solid rgba(0, 102, 255, 0.2);
-          border-width: 10px 0 10px 10px;
-          border-color: transparent transparent transparent rgba(0, 102, 255, 0.2);
-      }
-      
-      .right::before {
-          content: " ";
-          height: 0;
-          position: absolute;
-          top: 22px;
-          width: 0;
-          z-index: 1;
-          left: 30px;
-          border: medium solid rgba(0, 102, 255, 0.2);
-          border-width: 10px 10px 10px 0;
-          border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
-      }
-      
-      .right::after {
-          left: -10px;
-      }
-      
-      .roadmap-content {
-          padding: 20px 30px;
-          background: rgba(5, 11, 31, 0.7);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(0, 102, 255, 0.2);
-          border-radius: 1rem;
-          position: relative;
-          transition: all 0.3s ease;
-      }
-      
-      .roadmap-content:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
-          border-color: rgba(0, 102, 255, 0.5);
-      }
-      
-      .roadmap-date {
-          display: inline-block;
-          padding: 5px 15px;
-          background: linear-gradient(90deg, var(--primary), var(--secondary));
-          color: white;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          margin-bottom: 15px;
-      }
-      
-      .whitepaper-section {
-          background: rgba(5, 11, 31, 0.7);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(0, 102, 255, 0.2);
-          border-radius: 1rem;
-          margin-bottom: 1.5rem;
-          overflow: hidden;
-      }
-      
-      .whitepaper-header {
-          padding: 1.5rem;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: all 0.3s ease;
-      }
-      
-      .whitepaper-header:hover {
-          background: rgba(0, 102, 255, 0.1);
-      }
-      
-      .whitepaper-content {
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.5s ease;
-          padding: 0 1.5rem;
-      }
-      
-      .whitepaper-content.active {
-          max-height: 1000px;
-          padding: 0 1.5rem 1.5rem;
-      }
-      
-      .whitepaper-toggle {
-          transition: transform 0.3s ease;
-      }
-      
-      .whitepaper-toggle.active {
-          transform: rotate(180deg);
-      }
-      
-      @media screen and (max-width: 768px) {
-          .roadmap-timeline::after {
-              left: 31px;
-          }
-          
-          .roadmap-container {
-              width: 100%;
-              padding-left: 70px;
-              padding-right: 25px;
-          }
-          
-          .roadmap-container::before {
-              left: 60px;
-              border-width: 10px 10px 10px 0;
-              border-color: transparent rgba(0, 102, 255, 0.2) transparent transparent;
-          }
-          
-          .left::after, .right::after {
-              left: 21px;
-          }
-          
-          .right {
-              left: 0;
-          }
-      }
-  </style>  
-</head>
-
-<body class="bg-[#0d1216] text-white font-sans flex flex-col min-h-screen">
-
-  <!-- Header / Navigation -->
-  <header class="fixed top-0 w-full z-50 bg-opacity-80 bg-gray-900 backdrop-blur-md border-b border-blue-900/30">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-  
-      <!-- Logo -->
-      <a href="saved_resource(1).html" class="flex items-center">
-        <!-- your SVG logo -->
-        <span class="text-xl font-bold tracking-wider">
-          ECHOHUB<span class="gradient-text">NETWORK</span>
-        </span>
-      </a>
-  
-      <!-- Desktop Links -->
-      <div class="flex items-center space-x-6">
-        <nav class="hidden md:flex space-x-8">
-          <a href="index.html#about" class="hover:underline">About</a>
-          <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
-          <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
-          <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
-          <a href="index.html#join" class="hover:underline">Join</a>
-        </nav>
-  
-        <!-- Connect Wallet button (desktop) -->
-        <button
-          id="connect-wallet"
-          class="btn-primary ml-4 hidden md:inline-flex items-center"
-        >
-          Connect Wallet
-        </button>
-      </div>
-  
-      <!-- Mobile Hamburger -->
-      <div class="md:hidden">
-        <button id="menu-toggle" class="text-white">
-          <!-- hamburger SVG -->
-        </button>
-      </div>
-    </div>
-  
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
       <div class="px-2 pt-2 pb-4 space-y-1 text-center">
-          <a href="index.html#about" class="hover:underline">About</a>
-          <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
-          <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
-          <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
-          <a href="index.html#join" class="hover:underline">Join</a>
-        <!-- Connect Wallet (mobile) -->
-        <button
-          id="connect-wallet-mobile"
-          class="btn-primary w-full mt-2 inline-flex justify-center"
-        >
-          Connect Wallet
-        </button>
+        <a href="#about"       class="block py-2 hover:underline">About</a>
+        <a href="#sub-hubs"    class="block py-2 hover:underline">Sub-Hubs</a>
+        <a href="#tokenomics"  class="block py-2 hover:underline">Tokenomics</a>
+        <a href="#whitepaper"  class="block py-2 hover:underline">Whitepaper</a>
+        <a href="#roadmap"     class="block py-2 hover:underline">Roadmap</a>
+        <a href="#join"        class="block py-2 hover:underline">Join</a>
       </div>
     </div>
-  </header>
-  
+  </nav>
 
 
-  <!-- Combined EchoPixels Header -->
-  <main class="flex-grow pt-20">
-    <section class="container mx-auto px-4 text-center py-16">
-      <h1 class="text-5xl md:text-6xl font-bold mb-4 gradient-text" style="font-family: 'Orbitron', sans-serif;">
-        EchoPixels Interactive Ad Space
-      </h1>
-      <p class="text-lg opacity-80 mb-6">
-        Own a piece of the homepage. Buy pixel packages, then trade or design your space on our marketplace.<br>
-        Zoom & pan our 9 million-pixel canvas. Click a block to purchase or view info.
-      </p>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <div class="echo-rings">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 py-20 text-center relative z-10">
+            <div class="mb-8">
+                <svg class="h-32 w-32 mx-auto glow" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#0066ff" stroke-width="2"></circle>
+                    <circle cx="50" cy="50" r="30" stroke="#0066ff" stroke-width="2"></circle>
+                    <circle cx="50" cy="50" r="15" fill="#0066ff"></circle>
+                </svg>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-wider">ECHO<span class="gradient-text">HUB</span></h1>
+            <p class="text-2xl md:text-4xl mb-12 font-light tracking-wide">
+                <span class="block">The Signal Remains.</span>
+                <span class="block gradient-text font-medium">A Network Awakens.</span>
+            </p>
+            
+            <div class="flex flex-col items-center">
+                <a href="https://discord.gg/RUQt9DNK"
+   class="btn-primary mb-4 flex items-center"
+   target="_blank" rel="noopener noreferrer">
+  <span>Join our Discord here</span>
+  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+       xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+  </svg>
+</a>
+
+<a href="https://x.com/echonetworkhub1?s=21&t=K25olKVV91qSB_-xHsILTw"
+   class="btn-primary mb-4 flex items-center"
+   target="_blank" rel="noopener noreferrer">
+  <span>Follow our X here</span>
+  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+       xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+  </svg>
+</a>
+
+                <p class="text-sm opacity-80">Click to join the Discord and be early.</p>
+            </div>
+            
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
     </section>
 
+    <!-- About Section -->
+    <section id="about" class="py-20 relative">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-bold mb-12 text-center">What is <span class="gradient-text">Echo Network</span>?</h2>
+            
+            <div class="max-w-3xl mx-auto bg-gray-900/50 backdrop-blur-md p-8 rounded-2xl border border-blue-900/30">
+                <p class="text-lg mb-6 leading-relaxed">
+                    Echo Network is a revolutionary crypto ecosystem built on the principles of transparency, utility, and community ownership. Unlike traditional projects, we've designed Echo to be sustainable and resilient through market cycles.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">No Private Sales</h3>
+                            <p class="opacity-80">Fair launch with equal opportunity for all participants.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">100% Locked Liquidity</h3>
+                            <p class="opacity-80">All presale funds go directly to locked liquidity.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Vault-Backed Tokenomics</h3>
+                            <p class="opacity-80">EchoVault secures and grows the ecosystem treasury.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Cross-Chain Ready</h3>
+                            <p class="opacity-80">Decentralized, community-owned, and built for interoperability.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Built to Last</h3>
+                            <p class="opacity-80">Designed to outlive market cycles and provide long-term value.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-600/20 p-2 rounded-lg mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Smart Utility Sub-Hubs</h3>
+                            <p class="opacity-80">Interconnected platforms feeding value back to the ecosystem.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Sub-Hubs Section -->
+    <section id="sub-hubs" class="py-20 lg:py-32">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center">Sub-<span class="gradient-text">Hubs</span> Overview</h2>
+            <p class="text-center max-w-2xl mx-auto mb-16 text-lg opacity-80">
+                Our ecosystem is built around specialized Sub-Hubs, each designed to provide unique utility while feeding value back to the core network.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- EchoTrade -->
+                <a href="echotrade.html" class="block card p-6 h-full flex flex-col">
+                    <div class="hub-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">EchoTrade</h3>
+                    <p class="mb-4 opacity-80">A decentralized exchange where trading fees feed back into EchoVault. Built for stability, not speed.</p>
+                    <div class="mt-auto pt-4 border-t border-blue-900/30">
+                        <span class="text-sm font-medium text-blue-400">COMING Q3 2023</span>
+                    </div>
+                </a>
+                
+                  <!-- EchoFi -->
+                <a href="echofi.html" class="block hover:no-underline focus:outline-none">
+                     <div class="card p-6 h-full flex flex-col">
+                        <div class="hub-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">EchoFi</h3>
+                        <p class="mb-4 opacity-80">
+                            Stake. Lend. Grow. DeFi tools designed to reward the network, not extract from it.
+                        </p>
+                        <div class="mt-auto pt-4 border-t border-blue-900/30">
+                            <span class="text-sm font-medium text-blue-400">COMING SOON</span>
+                        </div>
+                    </div>
+                </a>
 
+                
+                <!-- EchoEstate -->
+                <a href="echoestate.html" class="card p-6 h-full flex flex-col">
+                    <div class="hub-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">EchoEstate</h3>
+                    <p class="mb-4 opacity-80">On-chain real estate investing with fractional ownership and rental yield distribution.</p>
+                    <div class="mt-auto pt-4 border-t border-blue-900/30">
+                        <span class="text-sm font-medium text-blue-400">COMING Q4 2023</span>
+                    </div>
+                </a>
+                
+                <!-- EchoLearn -->
+                <a href="echolearn.html" class="card p-6 h-full flex flex-col">
+                    <div class="hub-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">EchoLearn</h3>
+                    <p class="mb-4 opacity-80">On-chain education + certification, powering the next wave of Web3 contributors.</p>
+                    <div class="mt-auto pt-4 border-t border-blue-900/30">
+                        <span class="text-sm font-medium text-blue-400">COMING Q1 2024</span>
+                    </div>
+                </a>
+                
+                <!-- EchoPixels -->
+                <a href="echopixels.html" class="card p-6 h-full flex flex-col relative">
+                    <span class="new-badge flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        NEW
+                    </span>
+                    <div class="hub-icon">
+                        <i class="fas fa-th"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">EchoPixels</h3>
+                    <p class="mb-4 opacity-80">Own a piece of the front page. A 10 million pixel grid where ad space is bought and sold for $1 per pixel.</p>
+                    
+                    <div class="pixel-grid my-4">
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel filled"></div>
+                        <div class="pixel"></div>
+                        <div class="pixel"></div>
+                    </div>
+                    
+                    <p class="text-sm italic mt-2 mb-4">"This isn't just ad space. It's proof you were here early."</p>
+                    
+                    <div class="mt-auto pt-4 border-t border-blue-900/30">
+                        <span class="text-sm font-medium text-blue-400">LAUNCHING AT PRESALE</span>
+                    </div>
+                </a>
+                
+                <!-- Coming Soon -->
+                <div class="card p-6 h-full flex flex-col items-center justify-center bg-opacity-50 border-dashed">
+                    <div class="hub-icon opacity-50">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 opacity-70">More Coming Soon</h3>
+                    <p class="mb-4 opacity-60 text-center">The Echo Network ecosystem will continue to expand with new Sub-Hubs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <!-- ==============================================
-     EchoPixels Interactive 10M-Pixel Grid
-  ============================================== -->
-<section id="echopixels-grid" class="py-10 bg-[#0d1216] text-white">
-  <div class="container mx-auto px-4">
+    <!-- Tokenomics Section -->
+    <section id="tokenomics" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center">Tokenomics &amp; <span class="gradient-text">EchoVault</span></h2>
+            <p class="text-center max-w-2xl mx-auto mb-16 text-lg opacity-80">
+                The $ECHO token is designed with sustainability and long-term growth in mind, backed by our innovative EchoVault system.
+            </p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="tokenomics-chart relative flex items-center justify-center" style="aspect-ratio:1/1; max-width:320px; margin:auto;">
+                        <div style="width: 300px; margin: auto; position: relative;">
+                          <canvas id="tokenomicsChart"></canvas>
+                          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div class="text-center">
+                                  <div class="text-3xl font-bold gradient-text">200B</div>
+                                  <div class="text-sm opacity-80">Total Supply</div>
+                              </div>
+                          </div>
+                        </div>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                        window.addEventListener('DOMContentLoaded', function() {
+                          var ctx = document.getElementById('tokenomicsChart').getContext('2d');
+                          new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                              labels: ['Presale', 'Strategic', 'Founder'],
+                              datasets: [{
+                                data: [90, 5, 5],
+                                backgroundColor: ['#0066ff', '#ff00cc', '#00ccff'],
+                                borderWidth: 0
+                              }]
+                            },
+                            options: {
+                              responsive: true,
+                              plugins: {
+                                legend: {
+                                  position: 'bottom',
+                                  labels: {
+                                    color: '#ffffff'
+                                  }
+                                }
+                              }
+                            }
+                          });
+                        });
+                        </script>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
+                            <span>Presale: 90%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full bg-cyan-400 mr-2"></div>
+                            <span>Founder: 5% (locked)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded-full bg-pink-500 mr-2"></div>
+                            <span>Strategic: 5%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">The <span class="gradient-text">EchoVault</span> System</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-gray-900/50 backdrop-blur-md p-6 rounded-xl border border-blue-900/30">
+                            <h4 class="text-xl font-semibold mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                Self-Sustaining Treasury
+                            </h4>
+                            <p class="opacity-80">
+                                EchoVault collects a portion of all transaction fees across the ecosystem, creating a growing treasury that supports development and liquidity.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gray-900/50 backdrop-blur-md p-6 rounded-xl border border-blue-900/30">
+                            <h4 class="text-xl font-semibold mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Value Accrual Mechanism
+                            </h4>
+                            <p class="opacity-80">
+                                As Sub-Hubs generate revenue, a portion flows back to EchoVault, creating a positive feedback loop that benefits all token holders.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gray-900/50 backdrop-blur-md p-6 rounded-xl border border-blue-900/30">
+                            <h4 class="text-xl font-semibold mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                Community Governance
+                            </h4>
+                            <p class="opacity-80">
+                                $ECHO holders can vote on key decisions, including the allocation of EchoVault funds and the development of new Sub-Hubs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="flex flex-col items-center mb-6">
-      <div class="flex gap-4 mb-4">
-        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="10" data-h="10">Quick Buy 10x10</button>
-        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="50" data-h="50">Quick Buy 50x50</button>
-        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="100" data-h="100">Quick Buy 100x100</button>
-        <button class="btn-primary quick-buy text-lg px-6 py-3" data-x="0" data-y="0" data-w="200" data-h="200">Quick Buy 200x200</button>
+    <!-- Whitepaper Section -->
+    <section id="whitepaper" class="py-20 bg-gray-900/30">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center">White<span class="gradient-text">paper</span></h2>
+            <p class="text-center max-w-2xl mx-auto mb-16 text-lg opacity-80">
+                Our comprehensive whitepaper outlines the vision, technology, and roadmap for the Echo Network ecosystem.
+            </p>
+            
+            <div class="max-w-3xl mx-auto">
+                <!-- Whitepaper Download Button -->
+                <div class="flex justify-center mb-8">
+                  <a href="assets/whitepaper.pdf" download="whitepaper.pdf" class="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow transition-all duration-200" target="_blank" rel="noopener">
+                    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path></svg>
+                    Download Whitepaper (PDF)
+                  </a>
+                </div>
+                <div class="whitepaper-section">
+                    <div class="whitepaper-header" onclick="toggleSection('mission')">
+                        <h3 class="text-2xl font-bold">Mission Statement</h3>
+                        <svg id="mission-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="mission-content" class="whitepaper-content">
+                        <p class="mb-4"><b>Mission Statement</b></p>
+                        <p class="mb-4">To create a durable, community-owned digital asset ecosystem that amplifies real value, eliminates noise, and builds a permanent foundation for decentralized economic coordination.</p>
+                        <p class="mb-4">In a digital landscape overwhelmed by speculation, hype cycles, and fleeting attention, the Echo Network emerges with a singular focus: permanence.</p>
+                        <p class="mb-4">$ECHO is not just another Solana-based token — it is the foundational asset of an ecosystem designed to absorb value, resist dilution, and remain resilient through market noise. Built on principles of fairness, transparency, and long-term utility, $ECHO serves as both the economic anchor and philosophical core of a future Layer 1 chain: EchoChain.</p>
+                        <p class="mb-4">There are no venture capital allocations. No private presale discounts. No emission schedules or backdoors. Echo was created for those who believe that value should be earned, not extracted — and that community-driven ecosystems deserve better tools and stronger floors.</p>
+                        <p>The Echo Network represents a shift away from performative decentralization and toward a system where every user interaction contributes to a vault-backed foundation designed to last.</p>
+                    </div>
+                </div>
+                
+                <!-- Presale Structure -->
+                <div class="whitepaper-section">
+                    <div class="whitepaper-header" onclick="toggleSection('presale')">
+                        <h3 class="text-2xl font-bold">Presale Structure</h3>
+                        <svg id="presale-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="presale-content" class="whitepaper-content">
+                        <h4 class="text-xl font-semibold mb-4">3 Presale Rounds</h4>
+                        <ul class="list-disc pl-6 mb-6 space-y-2">
+                            <li>Each round will release a set amount of $ECHO, paired with a hard cap per round.</li>
+                            <li>Pricing increases per round to reward early conviction.</li>
+                        </ul>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
+                                <h5 class="font-bold mb-2">Round 1</h5>
+                                <p>Lowest price per $ECHO</p>
+                            </div>
+                            <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
+                                <h5 class="font-bold mb-2">Round 2</h5>
+                                <p>Moderate price per $ECHO</p>
+                            </div>
+                            <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
+                                <h5 class="font-bold mb-2">Round 3</h5>
+                                <p>Highest price per $ECHO</p>
+                            </div>
+                        </div>
+                        
+                        <h4 class="text-xl font-semibold mb-4">Redemption &amp; Vesting</h4>
+                        <ul class="list-disc pl-6 mb-6 space-y-2">
+                            <li>Presale participants will receive their tokens via a redemption portal after the final round is complete and the LP is established.</li>
+                            <li>All tokens distributed through presale will vest linearly over 90 days, reinforcing long-term alignment and reducing speculative volatility.</li>
+                        </ul>
+                        
+                        <h4 class="text-xl font-semibold mb-4">LP Dynamics</h4>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>All SOL raised in presale will be fully paired with the corresponding amount of $ECHO and locked.</li>
+                            <li>There will be no team-held liquidity and no additional token injections after the presale.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- EchoChain -->
+                <div class="whitepaper-section">
+                    <div class="whitepaper-header" onclick="toggleSection('echochain')">
+                        <h3 class="text-2xl font-bold">Key Attributes of EchoChain</h3>
+                        <svg id="echochain-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="echochain-content" class="whitepaper-content">
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="bg-blue-600/20 p-2 rounded-lg mr-4 mt-1">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">EVM-Compatible</h4>
+                                    <p class="opacity-80">Developers can deploy Ethereum-based smart contracts with minimal adaptation, enabling seamless onboarding of tools and dApps.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-blue-600/20 p-2 rounded-lg mr-4 mt-1">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Gas-Efficient Architecture</h4>
+                                    <p class="opacity-80">EchoChain uses a delegated proof-of-stake or hybrid consensus mechanism to keep fees ultra-low without sacrificing decentralization.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-blue-600/20 p-2 rounded-lg mr-4 mt-1">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Modular Sub-Hub Integration</h4>
+                                    <p class="opacity-80">All subhubs — EchoTrade, EchoFi, EchoGoods, EchoLearn, EchoEstate — will live natively on EchoChain, each operating as a permissionless protocol or dApp.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-blue-600/20 p-2 rounded-lg mr-4 mt-1">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Cross-Chain Interoperability</h4>
+                                    <p class="opacity-80">A native bridge will connect EchoChain to Solana and EVM chains, allowing $ECHO and other tokens to move fluidly across ecosystems.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-blue-600/20 p-2 rounded-lg mr-4 mt-1">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Token Utility Scaling</h4>
+                                    <p class="opacity-80">$ECHO becomes the gas token for all transactions, contract executions, and network operations on EchoChain.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <a href="ECHO Whitepaper - Final.pdf" class="btn-primary inline-flex items-center" target="_blank" rel="noopener">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        DOWNLOAD FULL WHITEPAPER
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section id="roadmap" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center">Road<span class="gradient-text">map</span></h2>
+            <p class="text-center max-w-2xl mx-auto mb-16 text-lg opacity-80">
+                The Echo Network was never meant to be rushed — it’s structured to launch in clear, deliberate phases that allow for long-term scalability, community alignment, and technical reliability.<br>Here is the current roadmap as of Phase I:
+            </p>
+            <div class="roadmap-timeline">
+                <!-- Phase 1A: Community Foundation -->
+                <div class="roadmap-container left">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">Phase 1A: Community Foundation <span class="text-green-400">(Current Phase)</span></h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Establish and actively grow Discord and Telegram communities</li>
+                            <li>Implement structured community moderation and support</li>
+                            <li>Launch social media campaigns for organic growth and interaction</li>
+                            <li>Host regular AMAs and interactive sessions for transparency and trust</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 1B: Platform Launch -->
+                <div class="roadmap-container right">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">Phase 1B: Platform Launch</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Develop robust informational framework (docs, guides, FAQs)</li>
+                            <li>Finalize branding materials, visual identity, and promotional strategies</li>
+                            <li>Establish strategic partnerships and collaborations</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 2: Launch & Fair Presale (Current Phase) -->
+                <div class="roadmap-container left">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">📍 Phase 2: Launch & Fair Presale</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Deploy $ECHO token on Solana</li>
+                            <li>Conduct 3-round presale at increasing price points</li>
+                            <li>Lock liquidity for 90 days post-LP creation</li>
+                            <li>Begin active community growth via content, calls, and Telegram</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 3: Ecosystem Formation -->
+                <div class="roadmap-container right">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">🔗 Phase 3: Ecosystem Formation</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Develop and test subhub modules (EchoTrade, EchoFi, etc.)</li>
+                            <li>Deploy claim portal with 90-day linear vesting logic</li>
+                            <li>Create and begin early UX/UI wireframes for EchoChain</li>
+                            <li>Visualize EchoVault metrics and tracking interfaces</li>
+                            <li>Begin content rollout for education and branding</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 4: EchoChain Development -->
+                <div class="roadmap-container left">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">🔭 Phase 4: EchoChain Development</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Begin core chain development: EVM compatibility, fee logic, vault integration</li>
+                            <li>Initiate bridge architecture from Solana to EchoChain</li>
+                            <li>Design subhub deployment framework for modular launch</li>
+                            <li>Deploy developer on-chain entry logic and access fee mechanisms</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 5: Migration & EchoChain Launch -->
+                <div class="roadmap-container right">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">🛠 Phase 5: Migration & EchoChain Launch</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Migrate LP and $ECHO from Solana to EchoChain</li>
+                            <li>Launch EchoChain with full vault connectivity</li>
+                            <li>Deploy initial subhubs with $ECHO utility embedded</li>
+                            <li>Begin vault auto-tracking and floor-price metrics</li>
+                            <li>Public chain monitoring tools for builders and users</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 6: Network Maturation -->
+                <div class="roadmap-container left">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">♾️ Phase 6: Network Maturation</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Expand real-world and partner integrations (EchoGoods, EchoEstate)</li>
+                            <li>Scale EchoLearn for global access and on-chain education</li>
+                            <li>Optimize subhub interactions for economic efficiency</li>
+                            <li>Reinforce $ECHO as the standard across the ecosystem</li>
+                            <li>Continue absorbing value into EchoVault — forever.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Join CTA -->
+<section id="join" class="py-20 bg-gray-900 text-white text-center">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold mb-4">Join the EchoHub Network</h2>
+      <div class="space-x-4">
+        <a href="https://discord.gg/RUQt9DNK"
+           class="btn btn-primary px-6 py-3 inline-block"
+           target="_blank" rel="noopener">
+          Join our Discord here
+        </a>
+<a href="https://x.com/echonetworkhub1?s=21&t=K25olKVV91qSB_-xHsILTw"
+   class="btn btn-primary px-6 py-3 inline-block"
+   target="_blank" rel="noopener">
+          Follow our X here
+        </a>
       </div>
-      <button id="buyLotBtn" class="btn-primary text-lg px-8 py-3">Buy Lot</button>
     </div>
-    <div class="w-full h-[80vh] border border-blue-900/30 rounded-xl overflow-hidden relative">
-      <canvas id="pixelCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
-    </div>
-<!-- Modal for designing/updating owned lot -->
-<div id="designModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
-  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-2xl shadow-2xl relative">
-    <button id="closeDesignModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
-    <h3 class="text-2xl font-bold mb-4">Design Your Lot</h3>
-    <div class="mb-4">
-      <canvas id="designCanvas" class="border border-blue-900/30 bg-white" style="max-width:100%;height:300px;"></canvas>
-    </div>
-    <div class="mb-4 flex gap-4">
-      <input type="color" id="drawColor" value="#000000" title="Draw Color" />
-      <button id="drawMode" class="btn-secondary">Draw</button>
-      <button id="eraseMode" class="btn-secondary">Erase</button>
-      <input type="file" id="uploadImage" accept="image/*" class="btn-secondary" />
-    </div>
-    <div class="mb-4">
-      <label>Embed Link (optional):</label>
-      <input id="designLink" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
-    </div>
-    <button id="saveDesign" class="btn-primary w-full mt-2">Save Design</button>
-    <div id="designModalStatus" class="mt-3 text-sm"></div>
-  </div>
-</div>
-  </div>
-</section>
-
-<!-- Modal for purchase -->
-<div id="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
-  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-md shadow-2xl relative">
-    <button id="closeModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
-    <h3 class="text-2xl font-bold mb-4">Purchase Pixel Block</h3>
-    <div class="mb-4">
-      <div><b>Block:</b> <span id="modalBlockCoords"></span></div>
-      <div><b>Price:</b> <span id="modalBlockPrice"></span> USD</div>
-    </div>
-    <div class="mb-4">
-      <label class="block mb-1">Your Link (optional):</label>
-      <input id="modalBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
-    </div>
-    <button id="confirmPurchase" class="btn-primary w-full mt-2">Confirm Purchase</button>
-    <div id="modalStatus" class="mt-3 text-sm"></div>
-  </div>
-</div>
-
-<!-- Modal for lot purchase -->
-<div id="lotModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
-  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
-    <button id="closeLotModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
-    <h3 class="text-2xl font-bold mb-4">Buy Pixel Lot</h3>
-    <div class="mb-4 grid grid-cols-2 gap-4">
-      <div>
-        <label class="block mb-1">Start X</label>
-        <select id="lotStartX" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
-      </div>
-      <div>
-        <label class="block mb-1">Start Y</label>
-        <select id="lotStartY" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
-      </div>
-      <div>
-        <label class="block mb-1">Width</label>
-        <select id="lotWidth" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
-      </div>
-      <div>
-        <label class="block mb-1">Height</label>
-        <select id="lotHeight" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
-      </div>
-    </div>
-    <div class="mb-4">
-      <label class="block mb-1">Your Link (optional):</label>
-      <input id="lotBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
-    </div>
-    <div class="mb-4 text-lg">
-      <b>Price:</b> <span id="lotPrice">0</span> USD
-      <span id="lotDiscount" class="ml-2 text-green-400 font-semibold"></span>
-    </div>
-    <div id="lotStep1">
-      <button id="confirmLotPurchase" class="btn-primary w-full mt-2">Confirm Lot Purchase</button>
-    </div>
-    <div id="lotStep2" class="hidden">
-      <div class="mb-2">Send payment to the Solana address below:</div>
-      <div class="bg-[#181f2e] p-2 rounded text-center select-all mb-2 text-blue-400 font-mono">2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c</div>
-      <div class="mb-2">Amount: <span id="lotSolAmount">0</span> SOL</div>
-      <button id="openWalletPay" class="btn-primary w-full mb-2">Send Payment with Wallet</button>
-      <button id="confirmPaymentSent" class="btn-primary w-full">I've Sent Payment</button>
-      <div class="text-xs mt-2 opacity-70">After payment is detected, you'll be able to design your lot.</div>
-    </div>
-    <div id="lotStep3" class="hidden">
-      <div class="mb-2 text-green-400 font-bold">Payment confirmed!</div>
-      <button id="openDesignLot" class="btn-primary w-full">Design Your Lot</button>
-    </div>
-    <div id="lotModalStatus" class="mt-3 text-sm"></div>
-  </div>
-</div>
-
-<!-- Firebase v10+ (module) -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getFirestore, doc, getDocs, collection, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
-  authDomain: "echo-pixels.firebaseapp.com",
-  projectId: "echo-pixels",
-  storageBucket: "echo-pixels.appspot.com",
-  messagingSenderId: "666866433912",
-  appId: "1:666866433912:web:28c1a82bec77d46043528d",
-  measurementId: "G-QS33CX4R74"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const canvas = document.getElementById('pixelCanvas');
-const ctx = canvas.getContext('2d');
-const totalSize = 3000;
-const blockSize = 10;
-let scale = 0.2;
-let offsetX = 0;
-let offsetY = 0;
-let isDragging = false, dragStart = {};
-let purchasedBlocks = {};
-let selectedBlock = null;
-
-// For lot modal
-let lotModalOpen = false;
-
-function resizeCanvas() {
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-  drawGrid();
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-// Real-time updates
-onSnapshot(collection(db, 'pixelBlocks'), (snapshot) => {
-  purchasedBlocks = {};
-  snapshot.forEach(doc => {
-    purchasedBlocks[doc.id] = doc.data();
-  });
-  drawGrid();
-});
-
-// Quick Buy buttons
-document.querySelectorAll('.quick-buy').forEach(btn => {
-  btn.onclick = () => {
-    fillLotDropdowns();
-    document.getElementById('lotStartX').value = btn.getAttribute('data-x');
-    document.getElementById('lotStartY').value = btn.getAttribute('data-y');
-    document.getElementById('lotWidth').value = btn.getAttribute('data-w');
-    document.getElementById('lotHeight').value = btn.getAttribute('data-h');
-    updateLotPrice();
-    document.getElementById('lotBlockURL').value = '';
-    document.getElementById('lotModalStatus').textContent = '';
-    document.getElementById('lotModal').classList.remove('hidden');
-    lotModalOpen = true;
-  };
-});
-
-// Design Modal logic (basic structure, drawing/upload/uploaded image, link, save)
-let currentDesignLot = null;
-function openDesignModal(lot) {
-  currentDesignLot = lot;
-  // Set up canvas size to lot size
-  const canvas = document.getElementById('designCanvas');
-  canvas.width = lot.w;
-  canvas.height = lot.h;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // TODO: Load existing design if present
-  document.getElementById('designLink').value = lot.link || '';
-  document.getElementById('designModalStatus').textContent = '';
-  document.getElementById('designModal').classList.remove('hidden');
-}
-document.getElementById('closeDesignModal').onclick = () => {
-  document.getElementById('designModal').classList.add('hidden');
-  currentDesignLot = null;
-};
-// Drawing logic (simple freehand)
-let drawing = false;
-let drawMode = 'draw';
-const designCanvas = document.getElementById('designCanvas');
-const drawColor = document.getElementById('drawColor');
-document.getElementById('drawMode').onclick = () => { drawMode = 'draw'; };
-document.getElementById('eraseMode').onclick = () => { drawMode = 'erase'; };
-designCanvas.addEventListener('mousedown', e => { drawing = true; });
-designCanvas.addEventListener('mouseup', e => { drawing = false; });
-designCanvas.addEventListener('mouseleave', e => { drawing = false; });
-designCanvas.addEventListener('mousemove', e => {
-  if (!drawing) return;
-  const rect = designCanvas.getBoundingClientRect();
-  const x = Math.floor((e.clientX - rect.left) * designCanvas.width / rect.width);
-  const y = Math.floor((e.clientY - rect.top) * designCanvas.height / rect.height);
-  const ctx = designCanvas.getContext('2d');
-  ctx.fillStyle = drawMode === 'draw' ? drawColor.value : '#fff';
-  ctx.fillRect(x, y, 2, 2);
-});
-// Upload image logic
-document.getElementById('uploadImage').onchange = function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    const img = new Image();
-    img.onload = function() {
-      const ctx = designCanvas.getContext('2d');
-      ctx.clearRect(0,0,designCanvas.width,designCanvas.height);
-      ctx.drawImage(img, 0, 0, designCanvas.width, designCanvas.height);
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-};
-// Save design (store as dataURL and link in Firestore for the lot)
-document.getElementById('saveDesign').onclick = async function() {
-  if (!currentDesignLot) return;
-  const status = document.getElementById('designModalStatus');
-  status.textContent = 'Saving...';
-  const dataURL = designCanvas.toDataURL();
-  const link = document.getElementById('designLink').value;
-  // Save to all blocks in lot
-  try {
-    let promises = [];
-    for(let x=currentDesignLot.x;x<currentDesignLot.x+currentDesignLot.w;x+=10) {
-      for(let y=currentDesignLot.y;y<currentDesignLot.y+currentDesignLot.h;y+=10) {
-        const blockId = `${x/10}_${y/10}`;
-        if(purchasedBlocks[blockId] && purchasedBlocks[blockId].owner === currentDesignLot.owner) {
-          promises.push(setDoc(doc(db, 'pixelBlocks', blockId), {
-            ...purchasedBlocks[blockId],
-            design: dataURL,
-            targetURL: link,
-          }));
-        }
-      }
-    }
-    await Promise.all(promises);
-    status.textContent = 'Design saved!';
-    setTimeout(()=>{
-      document.getElementById('designModal').classList.add('hidden');
-      currentDesignLot = null;
-    }, 1200);
-  } catch (e) {
-    status.textContent = 'Error: ' + e.message;
-  }
-};
-
-// Helper: fill dropdowns for lot modal
-function fillLotDropdowns() {
-  const xSel = document.getElementById('lotStartX');
-  const ySel = document.getElementById('lotStartY');
-  const wSel = document.getElementById('lotWidth');
-  const hSel = document.getElementById('lotHeight');
-  xSel.innerHTML = '';
-  ySel.innerHTML = '';
-  wSel.innerHTML = '';
-  hSel.innerHTML = '';
-  for(let i=0;i<=2990;i+=10) {
-    xSel.innerHTML += `<option value="${i}">${i}</option>`;
-    ySel.innerHTML += `<option value="${i}">${i}</option>`;
-  }
-  for(let i=10;i<=3000;i+=10) {
-    wSel.innerHTML += `<option value="${i}">${i}</option>`;
-    hSel.innerHTML += `<option value="${i}">${i}</option>`;
-  }
-}
-
-function getLotPrice(w, h) {
-  let pixels = w * h;
-  let price = pixels * 1.0; // $1 per pixel
-  let discount = 0;
-  if (pixels >= 10000) {
-    discount = 0.10;
-  } else if (pixels >= 2500) {
-    discount = 0.05;
-  }
-  if (discount > 0) price = price * (1 - discount);
-  return { price: price.toFixed(2), discount };
-}
-
-async function updateLotPrice() {
-  const w = parseInt(document.getElementById('lotWidth').value);
-  const h = parseInt(document.getElementById('lotHeight').value);
-  const { price, discount } = getLotPrice(w, h);
-  document.getElementById('lotPrice').textContent = price;
-  document.getElementById('lotDiscount').textContent = discount === 0 ? '' : (discount === 0.05 ? '5% discount' : '10% discount');
-  // Update SOL price live if payment step is visible
-  if (document.getElementById('lotStep2') && !document.getElementById('lotStep2').classList.contains('hidden')) {
-    document.getElementById('lotSolAmount').textContent = '...';
-    try {
-      const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-      const data = await resp.json();
-      const solUsd = data.solana.usd;
-      const solPrice = (parseFloat(price) / solUsd).toFixed(4);
-      document.getElementById('lotSolAmount').textContent = solPrice;
-      if(window._pendingLot) window._pendingLot.solPrice = solPrice;
-    } catch {
-      document.getElementById('lotSolAmount').textContent = 'Error';
-    }
-  }
-}
-
-// Open lot modal
-document.getElementById('buyLotBtn').onclick = () => {
-  fillLotDropdowns();
-  updateLotPrice();
-  document.getElementById('lotBlockURL').value = '';
-  document.getElementById('lotModalStatus').textContent = '';
-  document.getElementById('lotModal').classList.remove('hidden');
-  lotModalOpen = true;
-};
-document.getElementById('closeLotModal').onclick = () => {
-  document.getElementById('lotModal').classList.add('hidden');
-  lotModalOpen = false;
-};
-['lotStartX','lotStartY','lotWidth','lotHeight'].forEach(id => {
-  document.getElementById(id).onchange = updateLotPrice;
-});
-
-// Confirm lot purchase
-document.getElementById('confirmLotPurchase').onclick = async () => {
-  const startX = parseInt(document.getElementById('lotStartX').value);
-  const startY = parseInt(document.getElementById('lotStartY').value);
-  const w = parseInt(document.getElementById('lotWidth').value);
-  const h = parseInt(document.getElementById('lotHeight').value);
-  const url = document.getElementById('lotBlockURL').value;
-  const status = document.getElementById('lotModalStatus');
-  // Check bounds
-  if(startX + w > 3000 || startY + h > 3000) {
-    status.textContent = 'Lot exceeds grid bounds.';
-    return;
-  }
-  // Check all blocks are open
-  let unavailable = false;
-  let toBuy = [];
-  for(let x=startX;x<startX+w;x+=10) {
-    for(let y=startY;y<startY+h;y+=10) {
-      const blockId = `${x/10}_${y/10}`;
-      if(purchasedBlocks[blockId]) unavailable = true;
-      toBuy.push(blockId);
-    }
-  }
-  if(unavailable) {
-    status.textContent = 'Some blocks in this lot are already owned. Please choose another lot.';
-    return;
-  }
-  // Save lot info for payment step
-  window._pendingLot = { startX, startY, w, h, url, toBuy };
-  // Show payment step
-  document.getElementById('lotStep1').classList.add('hidden');
-  document.getElementById('lotStep2').classList.remove('hidden');
-  // Fetch live SOL/USD price and calculate SOL amount
-  const usd = parseFloat(document.getElementById('lotPrice').textContent);
-  document.getElementById('lotSolAmount').textContent = '...';
-  fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
-    .then(r => r.json())
-    .then(data => {
-      const solUsd = data.solana.usd;
-      const solPrice = (usd / solUsd).toFixed(4);
-      document.getElementById('lotSolAmount').textContent = solPrice;
-      window._pendingLot.solPrice = solPrice;
-    })
-    .catch(() => {
-      document.getElementById('lotSolAmount').textContent = 'Error';
-    });
-};
-
-// Payment step logic
-
-document.getElementById('openWalletPay').onclick = async () => {
-  if (!phantomStatus.provider || !phantomStatus.connected || !phantomStatus.publicKey) {
-    alert('Please connect your Phantom wallet first.');
-    return;
-  }
-
-  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
-  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
-
-  try {
-    // Using dedicated QuickNode Solana RPC endpoint
-    const connection = new solanaWeb3.Connection(
-      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
-      'confirmed'
-    );
-    const fromPubkey = phantomStatus.publicKey; // Use the PublicKey instance directly
-    const toPubkey = new solanaWeb3.PublicKey(recipient);
-
-    const transaction = new solanaWeb3.Transaction().add(
-      solanaWeb3.SystemProgram.transfer({
-        fromPubkey,
-        toPubkey,
-        lamports: Math.round(solPrice * solanaWeb3.LAMPORTS_PER_SOL)
-      })
-    );
-
-    transaction.feePayer = fromPubkey;
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
-    // Let Phantom sign AND send the transaction
-    const txid = await phantomStatus.provider.sendTransaction(transaction, connection);
-    document.getElementById('lotModalStatus').textContent = 'Transaction sent! TX: ' + txid;
-    window._pendingLot.txid = txid;
-  } catch (e) {
-    document.getElementById('lotModalStatus').textContent = 'Wallet payment failed: ' + e.message;
-  }
-};
-
-document.getElementById('confirmPaymentSent').onclick = async () => {
-  // Check for payment confirmation
-  const status = document.getElementById('lotModalStatus');
-  status.textContent = 'Checking for payment...';
-  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
-  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
-  let fromPubkey = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
-  if (!fromPubkey) {
-    status.textContent = 'Connect your wallet first.';
-    return;
-  }
-  try {
-    // IMPORTANT: Replace the URL below with your own QuickNode or Alchemy Solana RPC endpoint
-    const connection = new solanaWeb3.Connection(
-      'https://your-unique-rpc.solana-mainnet.quiknode.pro/REPLACE_WITH_YOURS',
-      'confirmed'
-    );
-    // Look for a recent transaction from user to recipient for the right amount
-    const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
-    let found = false;
-    for (let sig of sigs) {
-      const tx = await connection.getTransaction(sig.signature);
-      if (!tx) continue;
-      const from = tx.transaction.message.accountKeys[0].toString();
-      const to = tx.transaction.message.accountKeys[1].toString();
-      if (from === fromPubkey && to === recipient) {
-        // Check amount
-        const instr = tx.transaction.message.instructions[0];
-        if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
-          const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
-          if (Math.abs(amt - solPrice) < 0.001) {
-            found = true;
-            break;
-          }
-        }
-      }
-    }
-    if (found) {
-      status.textContent = 'Payment confirmed!';
-      document.getElementById('lotStep2').classList.add('hidden');
-      document.getElementById('lotStep3').classList.remove('hidden');
-    } else {
-      status.textContent = 'Payment not found yet. Please wait a minute and try again.';
-    }
-  } catch (e) {
-    status.textContent = 'Error checking payment: ' + e.message;
-  }
-};
-
-document.getElementById('openDesignLot').onclick = async () => {
-  // Mark blocks as purchased and open design modal
-  const lot = window._pendingLot;
-  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
-  try {
-    const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
-      owner,
-      blockX: parseInt(blockId.split('_')[0])*10,
-      blockY: parseInt(blockId.split('_')[1])*10,
-      targetURL: lot.url,
-      purchasedAt: new Date().toISOString(),
-    }));
-    await Promise.all(promises);
-    document.getElementById('lotModal').classList.add('hidden');
-    lotModalOpen = false;
-    // Open design modal for this lot
-    openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner, link: lot.url });
-  } catch (e) {
-    document.getElementById('lotModalStatus').textContent = 'Error: ' + e.message;
-  }
-};
-
-function drawGrid() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const cols = Math.ceil(canvas.width/(blockSize*scale));
-  const rows = Math.ceil(canvas.height/(blockSize*scale));
-  const startCol = Math.floor(offsetX/blockSize);
-  const startRow = Math.floor(offsetY/blockSize);
-  for(let i=-1;i<cols+1;i++) {
-    for(let j=-1;j<rows+1;j++) {
-      const x=(startCol+i)*blockSize, y=(startRow+j)*blockSize;
-      if(x<0||y<0||x>=totalSize||y>=totalSize)continue;
-      const screenX=(x-offsetX)*scale, screenY=(y-offsetY)*scale, s=blockSize*scale;
-      const id=`${x/blockSize}_${y/blockSize}`;
-      if(purchasedBlocks[id]) {
-        ctx.fillStyle="#0066ff";
-      }else{
-        ctx.fillStyle="#050b1f";
-      }
-      ctx.fillRect(screenX,screenY,s,s);
-      ctx.strokeStyle="#003366";
-      ctx.strokeRect(screenX,screenY,s,s);
-      // Show link icon if purchased
-      if(purchasedBlocks[id] && s > 12) {
-        ctx.font = `${Math.floor(s*0.7)}px Arial`;
-        ctx.fillStyle = "#fff";
-        ctx.fillText("🔗", screenX+s/4, screenY+s*0.7);
-      }
-    }
-  }
-}
-
-canvas.addEventListener('wheel',(e)=>{
-  e.preventDefault();
-  const zoom=e.deltaY*-0.001;
-  scale=Math.min(Math.max(scale*(1+zoom),0.02),4);
-  drawGrid();
-});
-
-canvas.addEventListener('mousedown',(e)=>{
-  isDragging=true; dragStart={x:e.clientX,y:e.clientY};
-});
-canvas.addEventListener('mousemove',(e)=>{
-  if(!isDragging)return;
-  offsetX-=(e.clientX-dragStart.x)/scale;
-  offsetY-=(e.clientY-dragStart.y)/scale;
-  dragStart={x:e.clientX,y:e.clientY};
-  requestAnimationFrame(drawGrid);
-});
-canvas.addEventListener('mouseup',()=>isDragging=false);
-canvas.addEventListener('mouseleave',()=>isDragging=false);
-
-canvas.addEventListener('click',(e)=>{
-  const rect = canvas.getBoundingClientRect();
-  const x=Math.floor((e.clientX-rect.left)/scale+offsetX);
-  const y=Math.floor((e.clientY-rect.top)/scale+offsetY);
-  const blockX=Math.floor(x/blockSize)*blockSize;
-  const blockY=Math.floor(y/blockSize)*blockSize;
-  const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
-  selectedBlock = { blockX, blockY, blockId };
-  if(purchasedBlocks[blockId]) {
-    // Open link if exists
-    if(purchasedBlocks[blockId].targetURL) {
-      window.open(purchasedBlocks[blockId].targetURL,'_blank');
-    } else {
-      alert('This block is owned.');
-    }
-  } else {
-    // Show modal to purchase
-    document.getElementById('modalBlockCoords').textContent = `${blockX}, ${blockY}`;
-    document.getElementById('modalBlockPrice').textContent = '100'; // $1 per pixel-block (10x10)
-    document.getElementById('modalBlockURL').value = '';
-    document.getElementById('modalStatus').textContent = '';
-    document.getElementById('purchaseModal').classList.remove('hidden');
-  }
-});
-
-// Modal logic
-document.getElementById('closeModal').onclick = () => {
-  document.getElementById('purchaseModal').classList.add('hidden');
-};
-
-document.getElementById('confirmPurchase').onclick = async () => {
-  if(!selectedBlock) return;
-  const url = document.getElementById('modalBlockURL').value;
-  const status = document.getElementById('modalStatus');
-  status.textContent = 'Processing...';
-  // Simulate wallet connect (replace with real wallet logic)
-  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
-  try {
-    await setDoc(doc(db, 'pixelBlocks', selectedBlock.blockId), {
-      owner,
-      blockX: selectedBlock.blockX,
-      blockY: selectedBlock.blockY,
-      targetURL: url,
-      purchasedAt: new Date().toISOString(),
-    });
-    status.textContent = 'Success! Block purchased.';
-    setTimeout(()=>{
-      document.getElementById('purchaseModal').classList.add('hidden');
-    }, 1200);
-  } catch (e) {
-    status.textContent = 'Error: ' + e.message;
-  }
-};
-</script>
-
-
-</body>
-</html>
+  </section>
+  
