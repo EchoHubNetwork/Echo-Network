@@ -634,15 +634,10 @@ document.addEventListener("DOMContentLoaded", () => {
     © 2025 EchoHub Network
   </footer>
 
-  <!-- JS Bundles -->
-  <script src="7.16.0.min.js"></script>
-  <script src="7b94e73388593f73.vendor.js"></script>
-  <script src="9e6139e4888034e2.runtime.js"></script>
-  <!-- …any other scripts from index.html… -->
 
   <!-- ==============================================
      EchoPixels Interactive 10M-Pixel Grid
-============================================== -->
+  ============================================== -->
 <section id="echopixels-grid" class="py-20 bg-[#0d1216] text-white">
   <div class="container mx-auto px-4">
     <h2 class="text-3xl md:text-5xl font-bold mb-6 text-center">
@@ -652,146 +647,100 @@ document.addEventListener("DOMContentLoaded", () => {
       Zoom & pan our 9 million-pixel canvas. Click a block to purchase or view info.
     </p>
 
+    <div class="flex flex-col items-center mb-6">
+      <div class="flex gap-4 mb-4">
+        <button class="btn-secondary quick-buy" data-x="0" data-y="0" data-w="50" data-h="50">Quick Buy 50x50</button>
+        <button class="btn-secondary quick-buy" data-x="100" data-y="100" data-w="100" data-h="100">Quick Buy 100x100</button>
+        <button class="btn-secondary quick-buy" data-x="500" data-y="500" data-w="200" data-h="200">Quick Buy 200x200</button>
+      </div>
+      <button id="buyLotBtn" class="btn-primary text-lg px-8 py-3">Buy Lot</button>
+    </div>
     <div class="w-full h-[80vh] border border-blue-900/30 rounded-xl overflow-hidden relative">
       <canvas id="pixelCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
     </div>
+<!-- Modal for designing/updating owned lot -->
+<div id="designModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-2xl shadow-2xl relative">
+    <button id="closeDesignModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Design Your Lot</h3>
+    <div class="mb-4">
+      <canvas id="designCanvas" class="border border-blue-900/30 bg-white" style="max-width:100%;height:300px;"></canvas>
+    </div>
+    <div class="mb-4 flex gap-4">
+      <input type="color" id="drawColor" value="#000000" title="Draw Color" />
+      <button id="drawMode" class="btn-secondary">Draw</button>
+      <button id="eraseMode" class="btn-secondary">Erase</button>
+      <input type="file" id="uploadImage" accept="image/*" class="btn-secondary" />
+    </div>
+    <div class="mb-4">
+      <label>Embed Link (optional):</label>
+      <input id="designLink" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <button id="saveDesign" class="btn-primary w-full mt-2">Save Design</button>
+    <div id="designModalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
   </div>
 </section>
 
+<!-- Modal for purchase -->
+<div id="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-md shadow-2xl relative">
+    <button id="closeModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Purchase Pixel Block</h3>
+    <div class="mb-4">
+      <div><b>Block:</b> <span id="modalBlockCoords"></span></div>
+      <div><b>Price:</b> <span id="modalBlockPrice"></span> USD</div>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Your Link (optional):</label>
+      <input id="modalBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <button id="confirmPurchase" class="btn-primary w-full mt-2">Confirm Purchase</button>
+    <div id="modalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<!-- Modal for lot purchase -->
+<div id="lotModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
+    <button id="closeLotModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Buy Pixel Lot</h3>
+    <div class="mb-4 grid grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">Start X</label>
+        <select id="lotStartX" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Start Y</label>
+        <select id="lotStartY" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Width</label>
+        <select id="lotWidth" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+      <div>
+        <label class="block mb-1">Height</label>
+        <select id="lotHeight" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white"></select>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Your Link (optional):</label>
+      <input id="lotBlockURL" type="url" class="w-full p-2 rounded bg-[#181f2e] border border-blue-900/30 text-white" placeholder="https://your-link.com" />
+    </div>
+    <div class="mb-4 text-lg">
+      <b>Price:</b> <span id="lotPrice">0</span> USD
+      <span id="lotDiscount" class="ml-2 text-green-400 font-semibold"></span>
+    </div>
+    <button id="confirmLotPurchase" class="btn-primary w-full mt-2">Confirm Lot Purchase</button>
+    <div id="lotModalStatus" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<!-- Firebase v10+ (module) -->
 <script type="module">
-  // Import Firebase modules
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-  import { getFirestore, doc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-  // Your Firebase configuration (Replace placeholders with your actual config)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
-    authDomain: "echo-pixels.firebaseapp.com",
-    projectId: "echo-pixels",
-    storageBucket: "echo-pixels.appspot.com",
-    messagingSenderId: "666866433912",
-    appId: "1:666866433912:web:28c1a82bec77d46043528d",
-    measurementId: "G-QS33CX4R74"
-  };
-
-  // Initialize Firebase app and Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // Canvas setup
-  const canvas = document.getElementById('pixelCanvas');
-  const ctx = canvas.getContext('2d');
-
-  const totalSize = 3000; // full grid size
-  const blockSize = 10;   // size per pixel-block
-  let scale = 0.2;
-  let offsetX = 0;
-  let offsetY = 0;
-  let isDragging = false, dragStart = {};
-
-  // Resize canvas on window resize
-  function resizeCanvas() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-    drawGrid();
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-
-  // Fetch purchased blocks from Firestore
-  let purchasedBlocks = {};
-
-  async function fetchBlocks() {
-    const snapshot = await getDocs(collection(db, 'pixelBlocks'));
-    snapshot.forEach(doc => {
-      purchasedBlocks[doc.id] = doc.data();
-    });
-    drawGrid();
-  }
-
-  fetchBlocks();
-
-  // Drawing function
-  function drawGrid() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const cols = Math.ceil(canvas.width / (blockSize * scale));
-    const rows = Math.ceil(canvas.height / (blockSize * scale));
-    const startCol = Math.floor(offsetX / blockSize);
-    const startRow = Math.floor(offsetY / blockSize);
-
-    for (let i = -1; i <= cols; i++) {
-      for (let j = -1; j <= rows; j++) {
-        const x = (startCol + i) * blockSize;
-        const y = (startRow + j) * blockSize;
-        if (x < 0 || y < 0 || x >= totalSize || y >= totalSize) continue;
-        const screenX = (x - offsetX) * scale;
-        const screenY = (y - offsetY) * scale;
-        const s = blockSize * scale;
-        const id = `${x / blockSize}_${y / blockSize}`;
-
-        ctx.fillStyle = purchasedBlocks[id] ? "#0066ff" : "#050b1f";
-        ctx.fillRect(screenX, screenY, s, s);
-        ctx.strokeStyle = "#003366";
-        ctx.strokeRect(screenX, screenY, s, s);
-      }
-    }
-  }
-
-  // Zoom functionality
-  canvas.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const zoom = e.deltaY * -0.001;
-    scale = Math.min(Math.max(scale * (1 + zoom), 0.02), 4);
-    drawGrid();
-  });
-
-  // Pan functionality
-  canvas.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStart = { x: e.clientX, y: e.clientY };
-  });
-
-  canvas.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    offsetX -= (e.clientX - dragStart.x) / scale;
-    offsetY -= (e.clientY - dragStart.y) / scale;
-    dragStart = { x: e.clientX, y: e.clientY };
-    requestAnimationFrame(drawGrid);
-  });
-
-  canvas.addEventListener('mouseup', () => isDragging = false);
-  canvas.addEventListener('mouseleave', () => isDragging = false);
-
-  // Click-to-Purchase Logic (Placeholder for future wallet integration)
-  canvas.addEventListener('click', (e) => {
-    const x = Math.floor(e.offsetX / scale + offsetX);
-    const y = Math.floor(e.offsetY / scale + offsetY);
-    const blockX = Math.floor(x / blockSize) * blockSize;
-    const blockY = Math.floor(y / blockSize) * blockSize;
-    const blockId = `${blockX / blockSize}_${blockY / blockSize}`;
-
-    if (purchasedBlocks[blockId]) {
-      const targetURL = purchasedBlocks[blockId].targetURL || "#";
-      window.open(targetURL, '_blank');
-    } else {
-      alert(`This block at ${blockX},${blockY} is available! Integrate your wallet to purchase.`);
-      // TODO: Future wallet integration for purchase transaction
-    }
-  });
-</script>
-
-
-<!-- Firebase Setup (correct version for your setup) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
-  projectId: "YOUR_FIREBASE_PROJECT_ID",
-  storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getFirestore, doc, getDocs, collection, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCAWMZN4torBTqxePa7HnBIvYuoUUPUNXc",
@@ -802,21 +751,22 @@ const firebaseConfig = {
   appId: "1:666866433912:web:28c1a82bec77d46043528d",
   measurementId: "G-QS33CX4R74"
 };
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const canvas = document.getElementById('pixelCanvas');
 const ctx = canvas.getContext('2d');
-
 const totalSize = 3000;
 const blockSize = 10;
 let scale = 0.2;
 let offsetX = 0;
 let offsetY = 0;
 let isDragging = false, dragStart = {};
+let purchasedBlocks = {};
+let selectedBlock = null;
+
+// For lot modal
+let lotModalOpen = false;
 
 function resizeCanvas() {
   canvas.width = canvas.clientWidth;
@@ -826,17 +776,224 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-let purchasedBlocks = {};
-
-async function fetchBlocks() {
-  const snapshot = await db.collection('pixelBlocks').get();
-  snapshot.docs.forEach(doc => {
+// Real-time updates
+onSnapshot(collection(db, 'pixelBlocks'), (snapshot) => {
+  purchasedBlocks = {};
+  snapshot.forEach(doc => {
     purchasedBlocks[doc.id] = doc.data();
   });
   drawGrid();
+});
+
+// Quick Buy buttons
+document.querySelectorAll('.quick-buy').forEach(btn => {
+  btn.onclick = () => {
+    fillLotDropdowns();
+    document.getElementById('lotStartX').value = btn.getAttribute('data-x');
+    document.getElementById('lotStartY').value = btn.getAttribute('data-y');
+    document.getElementById('lotWidth').value = btn.getAttribute('data-w');
+    document.getElementById('lotHeight').value = btn.getAttribute('data-h');
+    updateLotPrice();
+    document.getElementById('lotBlockURL').value = '';
+    document.getElementById('lotModalStatus').textContent = '';
+    document.getElementById('lotModal').classList.remove('hidden');
+    lotModalOpen = true;
+  };
+});
+
+// Design Modal logic (basic structure, drawing/upload/uploaded image, link, save)
+let currentDesignLot = null;
+function openDesignModal(lot) {
+  currentDesignLot = lot;
+  // Set up canvas size to lot size
+  const canvas = document.getElementById('designCanvas');
+  canvas.width = lot.w;
+  canvas.height = lot.h;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // TODO: Load existing design if present
+  document.getElementById('designLink').value = lot.link || '';
+  document.getElementById('designModalStatus').textContent = '';
+  document.getElementById('designModal').classList.remove('hidden');
+}
+document.getElementById('closeDesignModal').onclick = () => {
+  document.getElementById('designModal').classList.add('hidden');
+  currentDesignLot = null;
+};
+// Drawing logic (simple freehand)
+let drawing = false;
+let drawMode = 'draw';
+const designCanvas = document.getElementById('designCanvas');
+const drawColor = document.getElementById('drawColor');
+document.getElementById('drawMode').onclick = () => { drawMode = 'draw'; };
+document.getElementById('eraseMode').onclick = () => { drawMode = 'erase'; };
+designCanvas.addEventListener('mousedown', e => { drawing = true; });
+designCanvas.addEventListener('mouseup', e => { drawing = false; });
+designCanvas.addEventListener('mouseleave', e => { drawing = false; });
+designCanvas.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  const rect = designCanvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) * designCanvas.width / rect.width);
+  const y = Math.floor((e.clientY - rect.top) * designCanvas.height / rect.height);
+  const ctx = designCanvas.getContext('2d');
+  ctx.fillStyle = drawMode === 'draw' ? drawColor.value : '#fff';
+  ctx.fillRect(x, y, 2, 2);
+});
+// Upload image logic
+document.getElementById('uploadImage').onchange = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const ctx = designCanvas.getContext('2d');
+      ctx.clearRect(0,0,designCanvas.width,designCanvas.height);
+      ctx.drawImage(img, 0, 0, designCanvas.width, designCanvas.height);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+// Save design (store as dataURL and link in Firestore for the lot)
+document.getElementById('saveDesign').onclick = async function() {
+  if (!currentDesignLot) return;
+  const status = document.getElementById('designModalStatus');
+  status.textContent = 'Saving...';
+  const dataURL = designCanvas.toDataURL();
+  const link = document.getElementById('designLink').value;
+  // Save to all blocks in lot
+  try {
+    let promises = [];
+    for(let x=currentDesignLot.x;x<currentDesignLot.x+currentDesignLot.w;x+=10) {
+      for(let y=currentDesignLot.y;y<currentDesignLot.y+currentDesignLot.h;y+=10) {
+        const blockId = `${x/10}_${y/10}`;
+        if(purchasedBlocks[blockId] && purchasedBlocks[blockId].owner === currentDesignLot.owner) {
+          promises.push(setDoc(doc(db, 'pixelBlocks', blockId), {
+            ...purchasedBlocks[blockId],
+            design: dataURL,
+            targetURL: link,
+          }));
+        }
+      }
+    }
+    await Promise.all(promises);
+    status.textContent = 'Design saved!';
+    setTimeout(()=>{
+      document.getElementById('designModal').classList.add('hidden');
+      currentDesignLot = null;
+    }, 1200);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+};
+
+// Helper: fill dropdowns for lot modal
+function fillLotDropdowns() {
+  const xSel = document.getElementById('lotStartX');
+  const ySel = document.getElementById('lotStartY');
+  const wSel = document.getElementById('lotWidth');
+  const hSel = document.getElementById('lotHeight');
+  xSel.innerHTML = '';
+  ySel.innerHTML = '';
+  wSel.innerHTML = '';
+  hSel.innerHTML = '';
+  for(let i=0;i<=2990;i+=10) {
+    xSel.innerHTML += `<option value="${i}">${i}</option>`;
+    ySel.innerHTML += `<option value="${i}">${i}</option>`;
+  }
+  for(let i=10;i<=3000;i+=10) {
+    wSel.innerHTML += `<option value="${i}">${i}</option>`;
+    hSel.innerHTML += `<option value="${i}">${i}</option>`;
+  }
 }
 
-fetchBlocks();
+function getLotPrice(w, h) {
+  let pixels = w * h;
+  let price = pixels * 1.0; // $1 per pixel
+  let discount = 0;
+  if (pixels >= 10000) {
+    discount = 0.10;
+  } else if (pixels >= 2500) {
+    discount = 0.05;
+  }
+  if (discount > 0) price = price * (1 - discount);
+  return { price: price.toFixed(2), discount };
+}
+
+function updateLotPrice() {
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const { price, discount } = getLotPrice(w, h);
+  document.getElementById('lotPrice').textContent = price;
+  document.getElementById('lotDiscount').textContent = discount === 0 ? '' : (discount === 0.05 ? '5% discount' : '10% discount');
+}
+
+// Open lot modal
+document.getElementById('buyLotBtn').onclick = () => {
+  fillLotDropdowns();
+  updateLotPrice();
+  document.getElementById('lotBlockURL').value = '';
+  document.getElementById('lotModalStatus').textContent = '';
+  document.getElementById('lotModal').classList.remove('hidden');
+  lotModalOpen = true;
+};
+document.getElementById('closeLotModal').onclick = () => {
+  document.getElementById('lotModal').classList.add('hidden');
+  lotModalOpen = false;
+};
+['lotStartX','lotStartY','lotWidth','lotHeight'].forEach(id => {
+  document.getElementById(id).onchange = updateLotPrice;
+});
+
+// Confirm lot purchase
+document.getElementById('confirmLotPurchase').onclick = async () => {
+  const startX = parseInt(document.getElementById('lotStartX').value);
+  const startY = parseInt(document.getElementById('lotStartY').value);
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const url = document.getElementById('lotBlockURL').value;
+  const status = document.getElementById('lotModalStatus');
+  // Check bounds
+  if(startX + w > 3000 || startY + h > 3000) {
+    status.textContent = 'Lot exceeds grid bounds.';
+    return;
+  }
+  // Check all blocks are open
+  let unavailable = false;
+  let toBuy = [];
+  for(let x=startX;x<startX+w;x+=10) {
+    for(let y=startY;y<startY+h;y+=10) {
+      const blockId = `${x/10}_${y/10}`;
+      if(purchasedBlocks[blockId]) unavailable = true;
+      toBuy.push(blockId);
+    }
+  }
+  if(unavailable) {
+    status.textContent = 'Some blocks in this lot are already owned. Please choose another lot.';
+    return;
+  }
+  status.textContent = 'Processing...';
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
+  try {
+    // Write all blocks in lot
+    const promises = toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+      owner,
+      blockX: parseInt(blockId.split('_')[0])*10,
+      blockY: parseInt(blockId.split('_')[1])*10,
+      targetURL: url,
+      purchasedAt: new Date().toISOString(),
+    }));
+    await Promise.all(promises);
+    status.textContent = 'Success! Lot purchased.';
+    setTimeout(()=>{
+      document.getElementById('lotModal').classList.add('hidden');
+      lotModalOpen = false;
+    }, 1200);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+};
 
 function drawGrid() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -844,14 +1001,12 @@ function drawGrid() {
   const rows = Math.ceil(canvas.height/(blockSize*scale));
   const startCol = Math.floor(offsetX/blockSize);
   const startRow = Math.floor(offsetY/blockSize);
-
   for(let i=-1;i<cols+1;i++) {
     for(let j=-1;j<rows+1;j++) {
       const x=(startCol+i)*blockSize, y=(startRow+j)*blockSize;
       if(x<0||y<0||x>=totalSize||y>=totalSize)continue;
       const screenX=(x-offsetX)*scale, screenY=(y-offsetY)*scale, s=blockSize*scale;
       const id=`${x/blockSize}_${y/blockSize}`;
-
       if(purchasedBlocks[id]) {
         ctx.fillStyle="#0066ff";
       }else{
@@ -860,6 +1015,12 @@ function drawGrid() {
       ctx.fillRect(screenX,screenY,s,s);
       ctx.strokeStyle="#003366";
       ctx.strokeRect(screenX,screenY,s,s);
+      // Show link icon if purchased
+      if(purchasedBlocks[id] && s > 12) {
+        ctx.font = `${Math.floor(s*0.7)}px Arial`;
+        ctx.fillStyle = "#fff";
+        ctx.fillText("🔗", screenX+s/4, screenY+s*0.7);
+      }
     }
   }
 }
@@ -874,7 +1035,6 @@ canvas.addEventListener('wheel',(e)=>{
 canvas.addEventListener('mousedown',(e)=>{
   isDragging=true; dragStart={x:e.clientX,y:e.clientY};
 });
-
 canvas.addEventListener('mousemove',(e)=>{
   if(!isDragging)return;
   offsetX-=(e.clientX-dragStart.x)/scale;
@@ -882,24 +1042,62 @@ canvas.addEventListener('mousemove',(e)=>{
   dragStart={x:e.clientX,y:e.clientY};
   requestAnimationFrame(drawGrid);
 });
-
 canvas.addEventListener('mouseup',()=>isDragging=false);
 canvas.addEventListener('mouseleave',()=>isDragging=false);
 
 canvas.addEventListener('click',(e)=>{
-  const x=Math.floor(e.offsetX/scale+offsetX);
-  const y=Math.floor(e.offsetY/scale+offsetY);
+  const rect = canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/scale+offsetX);
+  const y=Math.floor((e.clientY-rect.top)/scale+offsetY);
   const blockX=Math.floor(x/blockSize)*blockSize;
   const blockY=Math.floor(y/blockSize)*blockSize;
   const blockId=`${blockX/blockSize}_${blockY/blockSize}`;
-
+  selectedBlock = { blockX, blockY, blockId };
   if(purchasedBlocks[blockId]) {
-    window.open(purchasedBlocks[blockId].targetURL,'_blank');
+    // Open link if exists
+    if(purchasedBlocks[blockId].targetURL) {
+      window.open(purchasedBlocks[blockId].targetURL,'_blank');
+    } else {
+      alert('This block is owned.');
+    }
   } else {
-    alert(`Purchase available block at ${blockX}, ${blockY}`);
-    // Future: wallet integration + purchase logic here
+    // Show modal to purchase
+    document.getElementById('modalBlockCoords').textContent = `${blockX}, ${blockY}`;
+    document.getElementById('modalBlockPrice').textContent = '100'; // $1 per pixel-block (10x10)
+    document.getElementById('modalBlockURL').value = '';
+    document.getElementById('modalStatus').textContent = '';
+    document.getElementById('purchaseModal').classList.remove('hidden');
   }
 });
+
+// Modal logic
+document.getElementById('closeModal').onclick = () => {
+  document.getElementById('purchaseModal').classList.add('hidden');
+};
+
+document.getElementById('confirmPurchase').onclick = async () => {
+  if(!selectedBlock) return;
+  const url = document.getElementById('modalBlockURL').value;
+  const status = document.getElementById('modalStatus');
+  status.textContent = 'Processing...';
+  // Simulate wallet connect (replace with real wallet logic)
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
+  try {
+    await setDoc(doc(db, 'pixelBlocks', selectedBlock.blockId), {
+      owner,
+      blockX: selectedBlock.blockX,
+      blockY: selectedBlock.blockY,
+      targetURL: url,
+      purchasedAt: new Date().toISOString(),
+    });
+    status.textContent = 'Success! Block purchased.';
+    setTimeout(()=>{
+      document.getElementById('purchaseModal').classList.add('hidden');
+    }, 1200);
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+};
 </script>
 
 
