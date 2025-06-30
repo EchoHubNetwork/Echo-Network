@@ -774,18 +774,26 @@ onSnapshot(collection(db, 'pixelBlocks'), (snapshot) => {
 });
 
 // Quick Buy buttons
+function openLotModal({startX, startY, w, h}) {
+  fillLotDropdowns();
+  document.getElementById('lotStartX').value = startX;
+  document.getElementById('lotStartY').value = startY;
+  document.getElementById('lotWidth').value = w;
+  document.getElementById('lotHeight').value = h;
+  updateLotPrice();
+  document.getElementById('lotBlockURL').value = '';
+  document.getElementById('lotModalStatus').textContent = '';
+  document.getElementById('lotModal').classList.remove('hidden');
+  lotModalOpen = true;
+}
 document.querySelectorAll('.quick-buy').forEach(btn => {
   btn.onclick = () => {
-    fillLotDropdowns();
-    document.getElementById('lotStartX').value = btn.getAttribute('data-x');
-    document.getElementById('lotStartY').value = btn.getAttribute('data-y');
-    document.getElementById('lotWidth').value = btn.getAttribute('data-w');
-    document.getElementById('lotHeight').value = btn.getAttribute('data-h');
-    updateLotPrice();
-    document.getElementById('lotBlockURL').value = '';
-    document.getElementById('lotModalStatus').textContent = '';
-    document.getElementById('lotModal').classList.remove('hidden');
-    lotModalOpen = true;
+    openLotModal({
+      startX: btn.getAttribute('data-x'),
+      startY: btn.getAttribute('data-y'),
+      w: btn.getAttribute('data-w'),
+      h: btn.getAttribute('data-h')
+    });
   };
 });
 
@@ -979,7 +987,8 @@ document.getElementById('confirmLotPurchase').onclick = async () => {
   document.getElementById('lotStep1').classList.add('hidden');
   document.getElementById('lotStep2').classList.remove('hidden');
   // Fetch live SOL/USD price and calculate SOL amount
-  const usd = parseFloat(document.getElementById('lotPrice').textContent);
+  const usd = w * h * 1.0; // $1 per pixel
+  document.getElementById('lotPrice').textContent = usd.toFixed(2);
   document.getElementById('lotSolAmount').textContent = '...';
   fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
     .then(r => r.json())
@@ -1136,9 +1145,54 @@ function drawGrid() {
 canvas.addEventListener('wheel',(e)=>{
   e.preventDefault();
   const zoom=e.deltaY*-0.001;
-  scale=Math.min(Math.max(scale*(1+zoom),0.02),4);
+  scale=Math.min(Math.max(scale*(1+zoom),0.02),12); // allow up to 12x zoom
   drawGrid();
 });
+
+// Add zoom in/out buttons
+const zoomControls = document.createElement('div');
+zoomControls.style.position = 'absolute';
+zoomControls.style.top = '20px';
+zoomControls.style.right = '20px';
+zoomControls.style.zIndex = 10;
+zoomControls.innerHTML = `
+  <button id="zoomInBtn" style="background:#0066ff;color:#fff;padding:8px 16px;border-radius:8px;margin-bottom:6px;display:block;">Zoom In +</button>
+  <button id="zoomOutBtn" style="background:#0066ff;color:#fff;padding:8px 16px;border-radius:8px;display:block;">Zoom Out -</button>
+`;
+canvas.parentElement.appendChild(zoomControls);
+document.getElementById('zoomInBtn').onclick = () => {
+  scale = Math.min(12, scale + 0.5);
+  drawGrid();
+};
+document.getElementById('zoomOutBtn').onclick = () => {
+  scale = Math.max(0.02, scale - 0.5);
+  drawGrid();
+};
+
+// DEV: Unlock block button for admin (for now, only visible if window.location.hash==="#dev")
+if (window.location.hash === "#dev") {
+  const unlockBtn = document.createElement('button');
+  unlockBtn.textContent = 'Unlock Block (DEV)';
+  unlockBtn.style.position = 'fixed';
+  unlockBtn.style.bottom = '30px';
+  unlockBtn.style.right = '30px';
+  unlockBtn.style.background = '#ff0066';
+  unlockBtn.style.color = '#fff';
+  unlockBtn.style.padding = '12px 24px';
+  unlockBtn.style.borderRadius = '8px';
+  unlockBtn.style.zIndex = 1000;
+  document.body.appendChild(unlockBtn);
+  unlockBtn.onclick = async () => {
+    const blockId = prompt('Enter blockId to unlock (e.g. 0_0):');
+    if (!blockId) return;
+    try {
+      await setDoc(doc(db, 'pixelBlocks', blockId), {}, { merge: false });
+      alert('Block unlocked.');
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  };
+}
 
 canvas.addEventListener('mousedown',(e)=>{
   isDragging=true; dragStart={x:e.clientX,y:e.clientY};
@@ -1169,12 +1223,8 @@ canvas.addEventListener('click',(e)=>{
       alert('This block is owned.');
     }
   } else {
-    // Show modal to purchase
-    document.getElementById('modalBlockCoords').textContent = `${blockX}, ${blockY}`;
-    document.getElementById('modalBlockPrice').textContent = '100'; // $1 per pixel-block (10x10)
-    document.getElementById('modalBlockURL').value = '';
-    document.getElementById('modalStatus').textContent = '';
-    document.getElementById('purchaseModal').classList.remove('hidden');
+    // Open the lot modal for a 10x10 lot at this location
+    openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
   }
 });
 
