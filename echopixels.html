@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <a href="index.html#about" class="hover:underline">About</a>
           <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
           <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
+          <a href="index.html#whitepaper" class="hover:underline">Whitepaper</a>
           <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
           <a href="index.html#join" class="hover:underline">Join</a>
         </nav>
@@ -580,12 +580,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-blur-md">
       <div class="px-2 pt-2 pb-4 space-y-1 text-center">
-          <a href="index.html#about" class="hover:underline">About</a>
-          <a href="index.html#sub-hubs" class="hover:underline">Sub-Hubs</a>
-          <a href="index.html#tokenomics" class="hover:underline">Tokenomics</a>
-          <a href="sindex.html#whitepaper" class="hover:underline">Whitepaper</a>
-          <a href="index.html#roadmap" class="hover:underline">Roadmap</a>
-          <a href="index.html#join" class="hover:underline">Join</a>
+        <a href="index.html#about" class="block py-2 hover:underline">About</a>
+        <a href="index.html#sub-hubs" class="block py-2 hover:underline">Sub-Hubs</a>
+        <a href="index.html#tokenomics" class="block py-2 hover:underline">Tokenomics</a>
+        <a href="index.html#whitepaper" class="block py-2 hover:underline">Whitepaper</a>
+        <a href="index.html#roadmap" class="block py-2 hover:underline">Roadmap</a>
+        <a href="index.html#join" class="block py-2 hover:underline">Join</a>
         <!-- Connect Wallet (mobile) -->
         <button
           id="connect-wallet-mobile"
@@ -915,19 +915,17 @@ async function updateLotPrice() {
   const { price, discount } = getLotPrice(w, h);
   document.getElementById('lotPrice').textContent = price;
   document.getElementById('lotDiscount').textContent = discount === 0 ? '' : (discount === 0.05 ? '5% discount' : '10% discount');
-  // Update SOL price live if payment step is visible
-  if (document.getElementById('lotStep2') && !document.getElementById('lotStep2').classList.contains('hidden')) {
-    document.getElementById('lotSolAmount').textContent = '...';
-    try {
-      const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-      const data = await resp.json();
-      const solUsd = data.solana.usd;
-      const solPrice = (parseFloat(price) / solUsd).toFixed(4);
-      document.getElementById('lotSolAmount').textContent = solPrice;
-      if(window._pendingLot) window._pendingLot.solPrice = solPrice;
-    } catch {
-      document.getElementById('lotSolAmount').textContent = 'Error';
-    }
+  // Always update SOL price live
+  document.getElementById('lotSolAmount').textContent = '...';
+  try {
+    const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    const data = await resp.json();
+    const solUsd = data.solana.usd;
+    const solPrice = (parseFloat(price) / solUsd).toFixed(4);
+    document.getElementById('lotSolAmount').textContent = solPrice;
+    if(window._pendingLot) window._pendingLot.solPrice = solPrice;
+  } catch {
+    document.getElementById('lotSolAmount').textContent = 'Error';
   }
 }
 
@@ -999,39 +997,36 @@ document.getElementById('confirmLotPurchase').onclick = async () => {
 // Payment step logic
 
 document.getElementById('openWalletPay').onclick = async () => {
-  if (!phantomStatus.provider || !phantomStatus.connected || !phantomStatus.publicKey) {
+  if (!window.solana || !window.solana.isPhantom) {
     alert('Please connect your Phantom wallet first.');
     return;
   }
 
-  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
+  const solAmount = parseFloat(document.getElementById('lotSolAmount').textContent);
   const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
+  const connection = new solanaWeb3.Connection(
+    'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
+    'confirmed'
+  );
+  const fromPubkey = new solanaWeb3.PublicKey(window.solana.publicKey.toString());
+  const toPubkey = new solanaWeb3.PublicKey(recipient);
+
+  const transaction = new solanaWeb3.Transaction().add(
+    solanaWeb3.SystemProgram.transfer({
+      fromPubkey,
+      toPubkey,
+      lamports: Math.round(solAmount * solanaWeb3.LAMPORTS_PER_SOL)
+    })
+  );
+
+  transaction.feePayer = fromPubkey;
+  transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
   try {
-    // Using dedicated QuickNode Solana RPC endpoint
-    const connection = new solanaWeb3.Connection(
-      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
-      'confirmed'
-    );
-    const fromPubkey = new solanaWeb3.PublicKey(phantomStatus.publicKey.toString());
-    const toPubkey = new solanaWeb3.PublicKey(recipient);
-
-    const transaction = new solanaWeb3.Transaction().add(
-      solanaWeb3.SystemProgram.transfer({
-        fromPubkey,
-        toPubkey,
-        lamports: Math.round(solPrice * solanaWeb3.LAMPORTS_PER_SOL)
-      })
-    );
-
-    transaction.feePayer = fromPubkey;
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
-    // Let Phantom sign AND send the transaction (latest API)
-    const signedTx = await window.solana.signAndSendTransaction(transaction);
-    const txid = signedTx.signature;
-    document.getElementById('lotModalStatus').textContent = 'Transaction sent! TX: ' + txid;
-    window._pendingLot.txid = txid;
+    const { signature } = await window.solana.signAndSendTransaction(transaction);
+    await connection.confirmTransaction(signature, 'confirmed');
+    document.getElementById('lotModalStatus').textContent = 'Transaction sent! TX: ' + signature;
+    window._pendingLot.txid = signature;
   } catch (e) {
     document.getElementById('lotModalStatus').textContent = 'Wallet payment failed: ' + e.message;
   }
