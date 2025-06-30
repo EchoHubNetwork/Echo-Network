@@ -1,8 +1,24 @@
-<!-- My Lots Button -->
-<button id="myLotsBtn" style="position:fixed;top:20px;right:20px;z-index:1001;padding:10px 18px;background:#222;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;">My Lots</button>
+
+<!-- My Lots Button (place in header/nav area, e.g. after wallet connect) -->
+<button
+  id="myLotsBtn"
+  class="btn-primary ml-4 inline-flex items-center"
+  style="z-index:51;"
+>
+  My Lots
+</button>
 
 <!-- Place the modal at the end of the body for proper stacking/context -->
 <!-- ...existing code... -->
+<!-- My Lots Modal (placed at end of body for proper stacking) -->
+<div id="myLotsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 hidden">
+  <div class="bg-[#101624] rounded-xl p-8 w-full max-w-lg shadow-2xl relative">
+    <button id="closeMyLotsModal" class="absolute top-3 right-3 text-white text-2xl">&times;</button>
+    <h3 class="text-2xl font-bold mb-4">Your Lots</h3>
+    <div id="myLotsList"></div>
+  </div>
+</div>
+
 </body>
 <!-- My Lots Modal (moved here for correct stacking and to avoid layout bugs) -->
 <div id="myLotsModal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.65);z-index:1002;display:flex;align-items:center;justify-content:center;">
@@ -12,65 +28,90 @@
     <button id="closeMyLotsModal" style="margin-top:18px;padding:8px 18px;background:#eee;border:none;border-radius:5px;cursor:pointer;">Close</button>
   </div>
 </div>
+
 // --- My Lots Modal Logic ---
 document.addEventListener('DOMContentLoaded', function() {
-  function showMyLotsModal() {
+  // Helper: Get lots owned by the connected wallet
+  function getUserLots() {
     const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
-    if (!user) {
-      alert('Connect your wallet to view your lots.');
-      return;
+    if (!user) return [];
+    let ownedBlocks = Object.entries(purchasedBlocks)
+      .filter(([id, data]) => data.owner === user)
+      .map(([id, data]) => ({ id, ...data }));
+    let lots = [];
+    let visited = new Set();
+    function dfs(block, lot) {
+      visited.add(block.id);
+      lot.push(block);
+      const neighbors = [
+        `${(block.blockX/10)-1}_${block.blockY/10}`,
+        `${(block.blockX/10)+1}_${block.blockY/10}`,
+        `${block.blockX/10}_${(block.blockY/10)-1}`,
+        `${block.blockX/10}_${(block.blockY/10)+1}`
+      ];
+      for (let nId of neighbors) {
+        if (!visited.has(nId)) {
+          const nBlock = ownedBlocks.find(b => b.id === nId);
+          if (nBlock) dfs(nBlock, lot);
+        }
+      }
     }
+    for (let block of ownedBlocks) {
+      if (!visited.has(block.id)) {
+        let lot = [];
+        dfs(block, lot);
+        lots.push(lot);
+      }
+    }
+    return lots.map(lotBlocks => {
+      const xs = lotBlocks.map(b => b.blockX);
+      const ys = lotBlocks.map(b => b.blockY);
+      return {
+        blocks: lotBlocks,
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+        w: Math.max(...xs) - Math.min(...xs) + 10,
+        h: Math.max(...ys) - Math.min(...ys) + 10,
+        owner: user,
+        link: lotBlocks[0]?.targetURL || ''
+      };
+    });
+  }
+
+  // Show the modal with user's lots
+  function showMyLotsModal() {
     const lots = getUserLots();
-    const listDiv = document.getElementById('myLotsList');
-    if (!listDiv) {
-      console.error('myLotsList element not found');
-      return;
-    }
-    if (!lots.length) {
-      listDiv.innerHTML = '<div style="color:#888;">You do not own any lots yet.</div>';
+    const list = document.getElementById('myLotsList');
+    list.innerHTML = '';
+    if (lots.length === 0) {
+      list.innerHTML = '<div class="text-center text-gray-400">You do not own any lots yet.</div>';
     } else {
-      listDiv.innerHTML = lots.map((lot, idx) => {
-        const desc = `Lot #${idx+1}: (${lot.x},${lot.y}) - ${lot.w}x${lot.h}`;
-        return `<div style='margin-bottom:12px;padding:10px 8px;background:#f7f7f7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;'>
-          <span style='color:#222;'>${desc}</span>
-          <button class='editLotBtn' data-lot='${encodeURIComponent(JSON.stringify(lot))}' style='padding:6px 14px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;'>Edit</button>
-        </div>`;
-      }).join('');
+      lots.forEach((lot, idx) => {
+        const div = document.createElement('div');
+        div.className = 'mb-4 p-3 rounded bg-[#181f2e] border border-blue-900/30';
+        div.innerHTML = `
+          <div><b>Lot #${idx + 1}:</b> ${lot.w}x${lot.h} at (${lot.x},${lot.y})</div>
+          <button class="btn-primary mt-2" data-lot="${idx}">Edit</button>
+        `;
+        list.appendChild(div);
+      });
+      // Attach edit handlers
+      list.querySelectorAll('button[data-lot]').forEach(btn => {
+        btn.onclick = () => {
+          const lot = lots[parseInt(btn.getAttribute('data-lot'))];
+          document.getElementById('myLotsModal').classList.add('hidden');
+          openDesignModal(lot);
+        };
+      });
     }
     document.getElementById('myLotsModal').classList.remove('hidden');
   }
 
-  var myLotsBtn = document.getElementById('myLotsBtn');
-  var closeMyLotsModal = document.getElementById('closeMyLotsModal');
-  var myLotsList = document.getElementById('myLotsList');
-  if (!myLotsBtn) console.error('myLotsBtn element not found');
-  if (!closeMyLotsModal) console.error('closeMyLotsModal element not found');
-  if (!myLotsList) console.error('myLotsList element not found');
-  if (myLotsBtn) myLotsBtn.onclick = showMyLotsModal;
-  if (closeMyLotsModal) closeMyLotsModal.onclick = () => {
+  // Button and modal event listeners
+  document.getElementById('myLotsBtn').onclick = showMyLotsModal;
+  document.getElementById('closeMyLotsModal').onclick = () => {
     document.getElementById('myLotsModal').classList.add('hidden');
   };
-  if (myLotsList) myLotsList.onclick = function(e) {
-    if (e.target.classList.contains('editLotBtn')) {
-      const lot = JSON.parse(decodeURIComponent(e.target.getAttribute('data-lot')));
-      document.getElementById('myLotsModal').classList.add('hidden');
-      openDesignModal(lot);
-    }
-  };
-
-  // Fix for Confirm Purchase button event listeners
-  var confirmBtn = document.getElementById('confirmPaymentSent');
-  if (confirmBtn) {
-    confirmBtn.onclick = window.confirmPaymentSentHandler || confirmBtn.onclick;
-  } else {
-    console.error('confirmPaymentSent button not found');
-  }
-  var openDesignBtn = document.getElementById('openDesignLot');
-  if (openDesignBtn) {
-    openDesignBtn.onclick = window.openDesignLotHandler || openDesignBtn.onclick;
-  } else {
-    console.error('openDesignLot button not found');
-  }
 });
 <!DOCTYPE html>
 <html lang="en">
