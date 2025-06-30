@@ -1,3 +1,47 @@
+<!-- My Lots Button and Modal -->
+<button id="myLotsBtn" style="position:fixed;top:20px;right:20px;z-index:1001;padding:10px 18px;background:#222;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;">My Lots</button>
+<div id="myLotsModal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.65);z-index:1002;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:32px 24px 24px 24px;border-radius:12px;min-width:320px;max-width:90vw;max-height:80vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+    <h2 style="margin-top:0;margin-bottom:18px;font-size:1.5em;color:#222;">Your Lots</h2>
+    <div id="myLotsList">Loading...</div>
+    <button id="closeMyLotsModal" style="margin-top:18px;padding:8px 18px;background:#eee;border:none;border-radius:5px;cursor:pointer;">Close</button>
+  </div>
+</div>
+// --- My Lots Modal Logic ---
+function showMyLotsModal() {
+  const user = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!user) {
+    alert('Connect your wallet to view your lots.');
+    return;
+  }
+  const lots = getUserLots();
+  const listDiv = document.getElementById('myLotsList');
+  if (!lots.length) {
+    listDiv.innerHTML = '<div style="color:#888;">You do not own any lots yet.</div>';
+  } else {
+    listDiv.innerHTML = lots.map((lot, idx) => {
+      const desc = `Lot #${idx+1}: (${lot.x},${lot.y}) - ${lot.w}x${lot.h}`;
+      return `<div style='margin-bottom:12px;padding:10px 8px;background:#f7f7f7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;'>
+        <span style='color:#222;'>${desc}</span>
+        <button class='editLotBtn' data-lot='${encodeURIComponent(JSON.stringify(lot))}' style='padding:6px 14px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;'>Edit</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('myLotsModal').classList.remove('hidden');
+}
+
+document.getElementById('myLotsBtn').onclick = showMyLotsModal;
+document.getElementById('closeMyLotsModal').onclick = () => {
+  document.getElementById('myLotsModal').classList.add('hidden');
+};
+
+document.getElementById('myLotsList').onclick = function(e) {
+  if (e.target.classList.contains('editLotBtn')) {
+    const lot = JSON.parse(decodeURIComponent(e.target.getAttribute('data-lot')));
+    document.getElementById('myLotsModal').classList.add('hidden');
+    openDesignModal(lot);
+  }
+};
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1163,6 +1207,19 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
       // Mark blocks as purchased and open design modal
       const lot = window._pendingLot;
       try {
+        // Optimistically update local purchasedBlocks for immediate UI feedback
+        lot.toBuy.forEach(blockId => {
+          purchasedBlocks[blockId] = {
+            owner: lot.owner,
+            blockX: parseInt(blockId.split('_')[0])*10,
+            blockY: parseInt(blockId.split('_')[1])*10,
+            targetURL: lot.url,
+            purchasedAt: new Date().toISOString(),
+            txSignature: txSignature
+          };
+        });
+        drawGrid();
+        // Write to Firestore
         const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
           owner: lot.owner,
           blockX: parseInt(blockId.split('_')[0])*10,
@@ -1172,7 +1229,7 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
           txSignature: txSignature
         }));
         await Promise.all(promises);
-        // Open design modal for this lot
+        // Open design modal for this lot (owner only)
         openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner: lot.owner, link: lot.url });
         document.getElementById('lotModal').classList.add('hidden');
         lotModalOpen = false;
@@ -1192,6 +1249,17 @@ document.getElementById('openDesignLot').onclick = async () => {
   const lot = window._pendingLot;
   let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
   try {
+    // Optimistically update local purchasedBlocks for immediate UI feedback
+    lot.toBuy.forEach(blockId => {
+      purchasedBlocks[blockId] = {
+        owner,
+        blockX: parseInt(blockId.split('_')[0])*10,
+        blockY: parseInt(blockId.split('_')[1])*10,
+        targetURL: lot.url,
+        purchasedAt: new Date().toISOString(),
+      };
+    });
+    drawGrid();
     const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
       owner,
       blockX: parseInt(blockId.split('_')[0])*10,
@@ -1202,7 +1270,7 @@ document.getElementById('openDesignLot').onclick = async () => {
     await Promise.all(promises);
     document.getElementById('lotModal').classList.add('hidden');
     lotModalOpen = false;
-    // Open design modal for this lot
+    // Open design modal for this lot (owner only)
     openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner, link: lot.url });
   } catch (e) {
     document.getElementById('lotModalStatus').textContent = 'Error: ' + e.message;
@@ -1331,7 +1399,18 @@ canvas.addEventListener('click',(e)=>{
       }
     }
   } else {
-    // Not owned, open lot modal for 10x10 at this location
+    // Not owned, but double-check: prevent purchase modal for already-owned lots (race condition)
+    let owned = false;
+    for(let x=blockX;x<blockX+10;x+=10) {
+      for(let y=blockY;y<blockY+10;y+=10) {
+        const id = `${x/10}_${y/10}`;
+        if(purchasedBlocks[id]) owned = true;
+      }
+    }
+    if(owned) {
+      alert('This lot is already owned.');
+      return;
+    }
     openLotModal({startX: blockX, startY: blockY, w: 10, h: 10});
   }
 });
