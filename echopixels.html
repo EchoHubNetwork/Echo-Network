@@ -1061,6 +1061,7 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
     // Look for a recent transaction from user to recipient for the right amount
     const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
     let found = false;
+    let txSignature = null;
     for (let sig of sigs) {
       const tx = await connection.getTransaction(sig.signature);
       if (!tx) continue;
@@ -1073,15 +1074,37 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
           const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
           if (Math.abs(amt - solPrice) < 0.001) {
             found = true;
+            txSignature = sig.signature;
             break;
           }
         }
       }
     }
     if (found) {
-      status.textContent = 'Payment confirmed!';
+      status.textContent = 'Payment confirmed! Locking your lot...';
       document.getElementById('lotStep2').classList.add('hidden');
       document.getElementById('lotStep3').classList.remove('hidden');
+      // Mark blocks as purchased and open design modal
+      const lot = window._pendingLot;
+      let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
+      try {
+        const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+          owner,
+          blockX: parseInt(blockId.split('_')[0])*10,
+          blockY: parseInt(blockId.split('_')[1])*10,
+          targetURL: lot.url,
+          purchasedAt: new Date().toISOString(),
+          txSignature: txSignature
+        }));
+        await Promise.all(promises);
+        // Open design modal for this lot
+        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner, link: lot.url });
+        // Hide lot modal
+        document.getElementById('lotModal').classList.add('hidden');
+        lotModalOpen = false;
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+      }
     } else {
       status.textContent = 'Payment not found yet. Please wait a minute and try again.';
     }
