@@ -4,11 +4,11 @@
     
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 <!-- Phantom Wallet Connection -->
+
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 <script>
   async function connectWallet() {
     const isPhantomInstalled = window.solana && window.solana.isPhantom;
-
     if (isPhantomInstalled) {
       try {
         const resp = await window.solana.connect();
@@ -25,9 +25,22 @@
     }
   }
 
+  function toggleSection(section) {
+    var content = document.getElementById(section + '-content');
+    var toggle = document.getElementById(section + '-toggle');
+    if (content) {
+      content.classList.toggle('active');
+    }
+    if (toggle) {
+      toggle.classList.toggle('active');
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById('connect-wallet').addEventListener('click', connectWallet);
-    document.getElementById('connect-wallet-mobile').addEventListener('click', connectWallet);
+    var connectWalletBtn = document.getElementById('connect-wallet');
+    var connectWalletMobileBtn = document.getElementById('connect-wallet-mobile');
+    if (connectWalletBtn) connectWalletBtn.addEventListener('click', connectWallet);
+    if (connectWalletMobileBtn) connectWalletMobileBtn.addEventListener('click', connectWallet);
   });
 </script>
 
@@ -574,10 +587,10 @@
             </p>
             
             <div class="flex flex-col items-center">
-                <a href="https://t.me/+8p56MUpNLPkzYTQx"
+                <a href="https://discord.gg/RUQt9DNK"
    class="btn-primary mb-4 flex items-center"
    target="_blank" rel="noopener noreferrer">
-  <span>Join our Telegram here</span>
+  <span>Join our Discord here</span>
   <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
        xmlns="http://www.w3.org/2000/svg">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -585,7 +598,7 @@
   </svg>
 </a>
 
-<a href="https://x.com/EchoHubNetwork"
+<a href="https://x.com/echonetworkhub1?s=21&t=K25olKVV91qSB_-xHsILTw"
    class="btn-primary mb-4 flex items-center"
    target="_blank" rel="noopener noreferrer">
   <span>Follow our X here</span>
@@ -596,7 +609,7 @@
   </svg>
 </a>
 
-                <p class="text-sm opacity-80">Click to join the Telegram and be early.</p>
+                <p class="text-sm opacity-80">Click to join the Discord and be early.</p>
             </div>
             
             <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
@@ -911,26 +924,44 @@
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <div class="tokenomics-chart">
-                        <svg viewBox="0 0 100 100" class="w-full h-full">
-                            <!-- Presale (90%) -->
-                            <path d="M50 50 L50 5 A45 45 0 0 1 95 50 A45 45 0 0 1 50 95 A45 45 0 0 1 5 50 A45 45 0 0 1 32.5 13.4 Z" fill="#0066ff"></path>
-                            
-                            <!-- Founder (5%) -->
-                            <path d="M50 50 L32.5 13.4 A45 45 0 0 1 41.3 9.2 Z" fill="#00ccff"></path>
-                            
-                            <!-- Strategic (5%) -->
-                            <path d="M50 50 L41.3 9.2 A45 45 0 0 1 50 5 Z" fill="#ff00cc"></path>
-                            
-                            <circle cx="50" cy="50" r="25" fill="var(--darker)"></circle>
-                        </svg>
-                        
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="text-3xl font-bold gradient-text">200B</div>
-                                <div class="text-sm opacity-80">Total Supply</div>
-                            </div>
+                    <div class="tokenomics-chart relative flex items-center justify-center" style="aspect-ratio:1/1; max-width:320px; margin:auto;">
+                        <div style="width: 300px; margin: auto; position: relative;">
+                          <canvas id="tokenomicsChart"></canvas>
+                          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div class="text-center">
+                                  <div class="text-3xl font-bold gradient-text">200B</div>
+                                  <div class="text-sm opacity-80">Total Supply</div>
+                              </div>
+                          </div>
                         </div>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                        window.addEventListener('DOMContentLoaded', function() {
+                          var ctx = document.getElementById('tokenomicsChart').getContext('2d');
+                          new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                              labels: ['Presale', 'Strategic', 'Founder'],
+                              datasets: [{
+                                data: [90, 5, 5],
+                                backgroundColor: ['#0066ff', '#ff00cc', '#00ccff'],
+                                borderWidth: 0
+                              }]
+                            },
+                            options: {
+                              responsive: true,
+                              plugins: {
+                                legend: {
+                                  position: 'bottom',
+                                  labels: {
+                                    color: '#ffffff'
+                                  }
+                                }
+                              }
+                            }
+                          });
+                        });
+                        </script>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 mt-8">
@@ -1005,34 +1036,25 @@
             <div class="max-w-3xl mx-auto">
                 <!-- Mission Statement -->
                 <div class="whitepaper-section">
-                    <div class="whitepaper-header" onclick="toggleSection(&#39;mission&#39;)">
+                    <div class="whitepaper-header" onclick="toggleSection('mission')">
                         <h3 class="text-2xl font-bold">Mission Statement</h3>
                         <svg id="mission-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
                     <div id="mission-content" class="whitepaper-content">
-                        <p class="mb-4">
-                            To create a durable, community-owned digital asset ecosystem that amplifies real value, eliminates noise, and builds a permanent foundation for decentralized economic coordination.
-                        </p>
-                        <p class="mb-4">
-                            In a digital landscape overwhelmed by speculation, hype cycles, and fleeting attention, the Echo Network emerges with a singular focus: permanence.
-                        </p>
-                        <p class="mb-4">
-                            $ECHO is not just another Solana-based token — it is the foundational asset of an ecosystem designed to absorb value, resist dilution, and remain resilient through market noise. Built on principles of fairness, transparency, and long-term utility, $ECHO serves as both the economic anchor and philosophical core of a future Layer 1 chain: EchoChain.
-                        </p>
-                        <p class="mb-4">
-                            There are no venture capital allocations. No private presale discounts. No emission schedules or backdoors. Echo was created for those who believe that value should be earned, not extracted — and that community-driven ecosystems deserve better tools and stronger floors.
-                        </p>
-                        <p>
-                            The Echo Network represents a shift away from performative decentralization and toward a system where every user interaction contributes to a vault-backed foundation designed to last.
-                        </p>
+                        <p class="mb-4"><b>Mission Statement</b></p>
+                        <p class="mb-4">To create a durable, community-owned digital asset ecosystem that amplifies real value, eliminates noise, and builds a permanent foundation for decentralized economic coordination.</p>
+                        <p class="mb-4">In a digital landscape overwhelmed by speculation, hype cycles, and fleeting attention, the Echo Network emerges with a singular focus: permanence.</p>
+                        <p class="mb-4">$ECHO is not just another Solana-based token — it is the foundational asset of an ecosystem designed to absorb value, resist dilution, and remain resilient through market noise. Built on principles of fairness, transparency, and long-term utility, $ECHO serves as both the economic anchor and philosophical core of a future Layer 1 chain: EchoChain.</p>
+                        <p class="mb-4">There are no venture capital allocations. No private presale discounts. No emission schedules or backdoors. Echo was created for those who believe that value should be earned, not extracted — and that community-driven ecosystems deserve better tools and stronger floors.</p>
+                        <p>The Echo Network represents a shift away from performative decentralization and toward a system where every user interaction contributes to a vault-backed foundation designed to last.</p>
                     </div>
                 </div>
                 
                 <!-- Presale Structure -->
                 <div class="whitepaper-section">
-                    <div class="whitepaper-header" onclick="toggleSection(&#39;presale&#39;)">
+                    <div class="whitepaper-header" onclick="toggleSection('presale')">
                         <h3 class="text-2xl font-bold">Presale Structure</h3>
                         <svg id="presale-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -1041,22 +1063,21 @@
                     <div id="presale-content" class="whitepaper-content">
                         <h4 class="text-xl font-semibold mb-4">3 Presale Rounds</h4>
                         <ul class="list-disc pl-6 mb-6 space-y-2">
-                            <li>Each round will release 60B $ECHO, paired with a hard cap per round.</li>
-                            <li>Pricing increases per round to reward early conviction:</li>
+                            <li>Each round will release a set amount of $ECHO, paired with a hard cap per round.</li>
+                            <li>Pricing increases per round to reward early conviction.</li>
                         </ul>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
                                 <h5 class="font-bold mb-2">Round 1</h5>
-                                <p>1 SOL = 10M ECHO</p>
+                                <p>Lowest price per $ECHO</p>
                             </div>
                             <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
                                 <h5 class="font-bold mb-2">Round 2</h5>
-                                <p>1 SOL = 8.33M ECHO</p>
+                                <p>Moderate price per $ECHO</p>
                             </div>
                             <div class="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl border border-blue-900/30 text-center">
                                 <h5 class="font-bold mb-2">Round 3</h5>
-                                <p>1 SOL = 6.66M ECHO</p>
+                                <p>Highest price per $ECHO</p>
                             </div>
                         </div>
                         
@@ -1076,7 +1097,7 @@
                 
                 <!-- EchoChain -->
                 <div class="whitepaper-section">
-                    <div class="whitepaper-header" onclick="toggleSection(&#39;echochain&#39;)">
+                    <div class="whitepaper-header" onclick="toggleSection('echochain')">
                         <h3 class="text-2xl font-bold">Key Attributes of EchoChain</h3>
                         <svg id="echochain-toggle" class="whitepaper-toggle w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -1148,7 +1169,7 @@
                 </div>
                 
                 <div class="mt-8 text-center">
-                    <a href="https://bb9f9jf9cxmj2pjt.canva-hosted-embed.com/codelet/AAEAEGJiOWY5amY5Y3htajJwanQAAAAAAZbWN5L_lTqhoZ3C6MVfB_A4E9QgwtlRPz0Q76wG4cdX21ntj-8/#" class="btn-primary inline-flex items-center">
+                    <a href="/Users/johngarofalo/Library/Messages/Attachments/ba/10/9A05213F-8AAB-4940-B761-750ABAD3FC6D/ECHO Whitepaper - Final.pdf" class="btn-primary inline-flex items-center" target="_blank" rel="noopener">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
@@ -1164,188 +1185,111 @@
         <div class="container mx-auto px-4">
             <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center">Road<span class="gradient-text">map</span></h2>
             <p class="text-center max-w-2xl mx-auto mb-16 text-lg opacity-80">
-                Our strategic development plan outlines the key milestones for the Echo Network ecosystem.
+                The Echo Network was never meant to be rushed — it’s structured to launch in clear, deliberate phases that allow for long-term scalability, community alignment, and technical reliability.<br>Here is the current roadmap as of Phase I:
             </p>
-            
             <div class="roadmap-timeline">
-                <!-- Q2 2023 -->
+                <!-- Phase 1A: Community Foundation -->
                 <div class="roadmap-container left">
                     <div class="roadmap-content">
-                        <span class="roadmap-date">Q2 2023</span>
-                        <h3 class="text-xl font-bold mb-3">Foundation Phase</h3>
+                        <h3 class="text-xl font-bold mb-3">Phase 1A: Community Foundation <span class="text-green-400">(Current Phase)</span></h3>
                         <ul class="space-y-2 opacity-80">
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Echo Network concept development</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Core team formation</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Whitepaper release</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Website launch</span>
-                            </li>
+                            <li>Establish and actively grow Discord and Telegram communities</li>
+                            <li>Implement structured community moderation and support</li>
+                            <li>Launch social media campaigns for organic growth and interaction</li>
+                            <li>Host regular AMAs and interactive sessions for transparency and trust</li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- Q3 2023 -->
+                <!-- Phase 1B: Platform Launch -->
                 <div class="roadmap-container right">
                     <div class="roadmap-content">
-                        <span class="roadmap-date">Q3 2023</span>
-                        <h3 class="text-xl font-bold mb-3">Launch Phase</h3>
+                        <h3 class="text-xl font-bold mb-3">Phase 1B: Platform Launch</h3>
                         <ul class="space-y-2 opacity-80">
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>$ECHO token presale (3 rounds)</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>DEX listing and liquidity provision</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoPixels launch</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoVault implementation</span>
-                            </li>
+                            <li>Develop robust informational framework (docs, guides, FAQs)</li>
+                            <li>Finalize branding materials, visual identity, and promotional strategies</li>
+                            <li>Establish strategic partnerships and collaborations</li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- Q4 2023 -->
+                <!-- Phase 2: Launch & Fair Presale (Current Phase) -->
                 <div class="roadmap-container left">
                     <div class="roadmap-content">
-                        <span class="roadmap-date">Q4 2023</span>
-                        <h3 class="text-xl font-bold mb-3">Expansion Phase</h3>
+                        <h3 class="text-xl font-bold mb-3">📍 Phase 2: Launch & Fair Presale</h3>
                         <ul class="space-y-2 opacity-80">
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoTrade DEX beta launch</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoFi staking platform launch</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>CEX listings</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoEstate concept development</span>
-                            </li>
+                            <li>Deploy $ECHO token on Solana</li>
+                            <li>Conduct 3-round presale at increasing price points</li>
+                            <li>Lock liquidity for 90 days post-LP creation</li>
+                            <li>Begin active community growth via content, calls, and Telegram</li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- Q1 2024 -->
+                <!-- Phase 3: Ecosystem Formation -->
                 <div class="roadmap-container right">
                     <div class="roadmap-content">
-                        <span class="roadmap-date">Q1 2024</span>
-                        <h3 class="text-xl font-bold mb-3">Growth Phase</h3>
+                        <h3 class="text-xl font-bold mb-3">🔗 Phase 3: Ecosystem Formation</h3>
                         <ul class="space-y-2 opacity-80">
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoLearn platform beta</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoEstate MVP launch</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Cross-chain bridge development</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoChain testnet preparation</span>
-                            </li>
+                            <li>Develop and test subhub modules (EchoTrade, EchoFi, etc.)</li>
+                            <li>Deploy claim portal with 90-day linear vesting logic</li>
+                            <li>Create and begin early UX/UI wireframes for EchoChain</li>
+                            <li>Visualize EchoVault metrics and tracking interfaces</li>
+                            <li>Begin content rollout for education and branding</li>
                         </ul>
                     </div>
                 </div>
-                
-                <!-- Q2-Q4 2024 -->
+                <!-- Phase 4: EchoChain Development -->
                 <div class="roadmap-container left">
                     <div class="roadmap-content">
-                        <span class="roadmap-date">Q2-Q4 2024</span>
-                        <h3 class="text-xl font-bold mb-3">Maturity Phase</h3>
+                        <h3 class="text-xl font-bold mb-3">🔭 Phase 4: EchoChain Development</h3>
                         <ul class="space-y-2 opacity-80">
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoChain testnet launch</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Developer ecosystem expansion</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Sub-Hub integration to EchoChain</span>
-                            </li>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>EchoChain main<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93fe1334249d4cf2',t:'MTc0NzI2NDI5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></span></li></ul></div></div></div></div></section><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;" src="./saved_resource.html"></iframe></body></html>
+                            <li>Begin core chain development: EVM compatibility, fee logic, vault integration</li>
+                            <li>Initiate bridge architecture from Solana to EchoChain</li>
+                            <li>Design subhub deployment framework for modular launch</li>
+                            <li>Deploy developer on-chain entry logic and access fee mechanisms</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 5: Migration & EchoChain Launch -->
+                <div class="roadmap-container right">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">🛠 Phase 5: Migration & EchoChain Launch</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Migrate LP and $ECHO from Solana to EchoChain</li>
+                            <li>Launch EchoChain with full vault connectivity</li>
+                            <li>Deploy initial subhubs with $ECHO utility embedded</li>
+                            <li>Begin vault auto-tracking and floor-price metrics</li>
+                            <li>Public chain monitoring tools for builders and users</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Phase 6: Network Maturation -->
+                <div class="roadmap-container left">
+                    <div class="roadmap-content">
+                        <h3 class="text-xl font-bold mb-3">♾️ Phase 6: Network Maturation</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li>Expand real-world and partner integrations (EchoGoods, EchoEstate)</li>
+                            <li>Scale EchoLearn for global access and on-chain education</li>
+                            <li>Optimize subhub interactions for economic efficiency</li>
+                            <li>Reinforce $ECHO as the standard across the ecosystem</li>
+                            <li>Continue absorbing value into EchoVault — forever.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <!-- Join CTA -->
 <section id="join" class="py-20 bg-gray-900 text-white text-center">
     <div class="container mx-auto px-4">
       <h2 class="text-4xl font-bold mb-4">Join the EchoHub Network</h2>
       <div class="space-x-4">
-        <a href="https://t.me/+8p56MUpNLPkzYTQx"
+        <a href="https://discord.gg/RUQt9DNK"
            class="btn btn-primary px-6 py-3 inline-block"
            target="_blank" rel="noopener">
-          Join our Telegram here
+          Join our Discord here
         </a>
-        <a href="https://x.com/EchoHubNetwork"
-           class="btn btn-primary px-6 py-3 inline-block"
-           target="_blank" rel="noopener">
+<a href="https://x.com/echonetworkhub1?s=21&t=K25olKVV91qSB_-xHsILTw"
+   class="btn btn-primary px-6 py-3 inline-block"
+   target="_blank" rel="noopener">
           Follow our X here
         </a>
       </div>
