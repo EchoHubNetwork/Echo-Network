@@ -1065,7 +1065,7 @@ document.getElementById('closeLotModal').onclick = () => {
   document.getElementById(id).onchange = updateLotPrice;
 });
 
-// Confirm lot purchase
+// --- ENFORCE WALLET OWNERSHIP ON LOT PURCHASE ---
 document.getElementById('confirmLotPurchase').onclick = async () => {
   const startX = parseInt(document.getElementById('lotStartX').value);
   const startY = parseInt(document.getElementById('lotStartY').value);
@@ -1073,6 +1073,12 @@ document.getElementById('confirmLotPurchase').onclick = async () => {
   const h = parseInt(document.getElementById('lotHeight').value);
   const url = document.getElementById('lotBlockURL').value;
   const status = document.getElementById('lotModalStatus');
+  // ENFORCE WALLET CONNECTION
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet before purchasing.';
+    return;
+  }
   // Check bounds
   if(startX + w > 3000 || startY + h > 3000) {
     status.textContent = 'Lot exceeds grid bounds.';
@@ -1093,7 +1099,7 @@ document.getElementById('confirmLotPurchase').onclick = async () => {
     return;
   }
   // Save lot info for payment step
-  window._pendingLot = { startX, startY, w, h, url, toBuy };
+  window._pendingLot = { startX, startY, w, h, url, toBuy, owner };
   // Show payment step
   document.getElementById('lotStep1').classList.add('hidden');
   document.getElementById('lotStep2').classList.remove('hidden');
@@ -1114,62 +1120,22 @@ document.getElementById('confirmLotPurchase').onclick = async () => {
     });
 };
 
-// Payment step logic
-
-document.getElementById('openWalletPay').onclick = async () => {
-  if (!window.solana || !window.solana.isPhantom) {
-    alert('Please connect your Phantom wallet first.');
-    return;
-  }
-
-  const solAmount = parseFloat(document.getElementById('lotSolAmount').textContent);
-  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
-  const connection = new solanaWeb3.Connection(
-    'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
-    'confirmed'
-  );
-  const fromPubkey = new solanaWeb3.PublicKey(window.solana.publicKey.toString());
-  const toPubkey = new solanaWeb3.PublicKey(recipient);
-
-  const transaction = new solanaWeb3.Transaction().add(
-    solanaWeb3.SystemProgram.transfer({
-      fromPubkey,
-      toPubkey,
-      lamports: Math.round(solAmount * solanaWeb3.LAMPORTS_PER_SOL)
-    })
-  );
-
-  transaction.feePayer = fromPubkey;
-  transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
-  try {
-    const { signature } = await window.solana.signAndSendTransaction(transaction);
-    await connection.confirmTransaction(signature, 'confirmed');
-    document.getElementById('lotModalStatus').textContent = 'Transaction sent! TX: ' + signature;
-    window._pendingLot.txid = signature;
-  } catch (e) {
-    document.getElementById('lotModalStatus').textContent = 'Wallet payment failed: ' + e.message;
-  }
-};
-
+// --- AFTER PAYMENT, LOCK LOT TO WALLET AND OPEN EDIT WINDOW ---
 document.getElementById('confirmPaymentSent').onclick = async () => {
-  // Check for payment confirmation
   const status = document.getElementById('lotModalStatus');
   status.textContent = 'Checking for payment...';
   const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
   const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
-  let fromPubkey = window.solana && window.solana.publicKey ? new solanaWeb3.PublicKey(window.solana.publicKey.toString()) : null;
-  if (!fromPubkey) {
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
     status.textContent = 'Connect your wallet first.';
     return;
   }
   try {
-    // Using dedicated QuickNode Solana RPC endpoint
     const connection = new solanaWeb3.Connection(
       'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
       'confirmed'
     );
-    // Look for a recent transaction from user to recipient for the right amount
     const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
     let found = false;
     let txSignature = null;
@@ -1178,8 +1144,7 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
       if (!tx) continue;
       const from = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[0].toString());
       const to = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[1].toString());
-      if (from.equals(fromPubkey) && to.equals(new solanaWeb3.PublicKey(recipient))) {
-        // Check amount
+      if (from.equals(new solanaWeb3.PublicKey(owner)) && to.equals(new solanaWeb3.PublicKey(recipient))) {
         const instr = tx.transaction.message.instructions[0];
         if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
           const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
@@ -1197,10 +1162,9 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
       document.getElementById('lotStep3').classList.remove('hidden');
       // Mark blocks as purchased and open design modal
       const lot = window._pendingLot;
-      let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : 'demo-user';
       try {
         const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
-          owner,
+          owner: lot.owner,
           blockX: parseInt(blockId.split('_')[0])*10,
           blockY: parseInt(blockId.split('_')[1])*10,
           targetURL: lot.url,
@@ -1209,8 +1173,7 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
         }));
         await Promise.all(promises);
         // Open design modal for this lot
-        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner, link: lot.url });
-        // Hide lot modal
+        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner: lot.owner, link: lot.url });
         document.getElementById('lotModal').classList.add('hidden');
         lotModalOpen = false;
       } catch (e) {
@@ -1399,6 +1362,128 @@ document.getElementById('confirmPurchase').onclick = async () => {
     }, 1200);
   } catch (e) {
     status.textContent = 'Error: ' + e.message;
+  }
+};
+
+// --- ENFORCE WALLET OWNERSHIP ON LOT PURCHASE ---
+document.getElementById('confirmLotPurchase').onclick = async () => {
+  const startX = parseInt(document.getElementById('lotStartX').value);
+  const startY = parseInt(document.getElementById('lotStartY').value);
+  const w = parseInt(document.getElementById('lotWidth').value);
+  const h = parseInt(document.getElementById('lotHeight').value);
+  const url = document.getElementById('lotBlockURL').value;
+  const status = document.getElementById('lotModalStatus');
+  // ENFORCE WALLET CONNECTION
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet before purchasing.';
+    return;
+  }
+  // Check bounds
+  if(startX + w > 3000 || startY + h > 3000) {
+    status.textContent = 'Lot exceeds grid bounds.';
+    return;
+  }
+  // Check all blocks are open
+  let unavailable = false;
+  let toBuy = [];
+  for(let x=startX;x<startX+w;x+=10) {
+    for(let y=startY;y<startY+h;y+=10) {
+      const blockId = `${x/10}_${y/10}`;
+      if(purchasedBlocks[blockId]) unavailable = true;
+      toBuy.push(blockId);
+    }
+  }
+  if(unavailable) {
+    status.textContent = 'Some blocks in this lot are already owned. Please choose another lot.';
+    return;
+  }
+  // Save lot info for payment step
+  window._pendingLot = { startX, startY, w, h, url, toBuy, owner };
+  // Show payment step
+  document.getElementById('lotStep1').classList.add('hidden');
+  document.getElementById('lotStep2').classList.remove('hidden');
+  // Fetch live SOL/USD price and calculate SOL amount
+  const usd = w * h * 1.0; // $1 per pixel
+  document.getElementById('lotPrice').textContent = usd.toFixed(2);
+  document.getElementById('lotSolAmount').textContent = '...';
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
+    .then(r => r.json())
+    .then(data => {
+      const solUsd = data.solana.usd;
+      const solPrice = (usd / solUsd).toFixed(4);
+      document.getElementById('lotSolAmount').textContent = solPrice;
+      window._pendingLot.solPrice = solPrice;
+    })
+    .catch(() => {
+      document.getElementById('lotSolAmount').textContent = 'Error';
+    });
+};
+
+// --- AFTER PAYMENT, LOCK LOT TO WALLET AND OPEN EDIT WINDOW ---
+document.getElementById('confirmPaymentSent').onclick = async () => {
+  const status = document.getElementById('lotModalStatus');
+  status.textContent = 'Checking for payment...';
+  const solPrice = parseFloat(document.getElementById('lotSolAmount').textContent);
+  const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
+  let owner = window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null;
+  if (!owner) {
+    status.textContent = 'Connect your wallet first.';
+    return;
+  }
+  try {
+    const connection = new solanaWeb3.Connection(
+      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
+      'confirmed'
+    );
+    const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
+    let found = false;
+    let txSignature = null;
+    for (let sig of sigs) {
+      const tx = await connection.getTransaction(sig.signature);
+      if (!tx) continue;
+      const from = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[0].toString());
+      const to = new solanaWeb3.PublicKey(tx.transaction.message.accountKeys[1].toString());
+      if (from.equals(new solanaWeb3.PublicKey(owner)) && to.equals(new solanaWeb3.PublicKey(recipient))) {
+        const instr = tx.transaction.message.instructions[0];
+        if (instr.parsed && instr.parsed.info && instr.parsed.info.lamports) {
+          const amt = instr.parsed.info.lamports / solanaWeb3.LAMPORTS_PER_SOL;
+          if (Math.abs(amt - solPrice) < 0.001) {
+            found = true;
+            txSignature = sig.signature;
+            break;
+          }
+        }
+      }
+    }
+    if (found) {
+      status.textContent = 'Payment confirmed! Locking your lot...';
+      document.getElementById('lotStep2').classList.add('hidden');
+      document.getElementById('lotStep3').classList.remove('hidden');
+      // Mark blocks as purchased and open design modal
+      const lot = window._pendingLot;
+      try {
+        const promises = lot.toBuy.map(blockId => setDoc(doc(db, 'pixelBlocks', blockId), {
+          owner: lot.owner,
+          blockX: parseInt(blockId.split('_')[0])*10,
+          blockY: parseInt(blockId.split('_')[1])*10,
+          targetURL: lot.url,
+          purchasedAt: new Date().toISOString(),
+          txSignature: txSignature
+        }));
+        await Promise.all(promises);
+        // Open design modal for this lot
+        openDesignModal({ x: lot.startX, y: lot.startY, w: lot.w, h: lot.h, owner: lot.owner, link: lot.url });
+        document.getElementById('lotModal').classList.add('hidden');
+        lotModalOpen = false;
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+      }
+    } else {
+      status.textContent = 'Payment not found yet. Please wait a minute and try again.';
+    }
+  } catch (e) {
+    status.textContent = 'Error checking payment: ' + e.message;
   }
 };
 </script>
