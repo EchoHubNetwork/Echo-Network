@@ -1008,7 +1008,11 @@ document.getElementById('openWalletPay').onclick = async () => {
   const recipient = '2b5M7q7dkNvKYAYRP3qyQVCMTUCyLF2wMrs4JcJziK3c';
 
   try {
-    const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+    // Using dedicated QuickNode Solana RPC endpoint
+    const connection = new solanaWeb3.Connection(
+      'https://magical-hardworking-patina.solana-mainnet.quiknode.pro/ea0e45615201b1ebbdd82b2c0f502bbe07e5ef8d/',
+      'confirmed'
+    );
     const fromPubkey = phantomStatus.publicKey; // Use the PublicKey instance directly
     const toPubkey = new solanaWeb3.PublicKey(recipient);
 
@@ -1044,7 +1048,11 @@ document.getElementById('confirmPaymentSent').onclick = async () => {
     return;
   }
   try {
-    const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+    // IMPORTANT: Replace the URL below with your own QuickNode or Alchemy Solana RPC endpoint
+    const connection = new solanaWeb3.Connection(
+      'https://your-unique-rpc.solana-mainnet.quiknode.pro/REPLACE_WITH_YOURS',
+      'confirmed'
+    );
     // Look for a recent transaction from user to recipient for the right amount
     const sigs = await connection.getSignaturesForAddress(new solanaWeb3.PublicKey(recipient), { limit: 20 });
     let found = false;
